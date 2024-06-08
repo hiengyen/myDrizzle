@@ -14,6 +14,18 @@ yarn generate
 
 yarn migrate
 
+# Push to Neon Serverless
+
+yarn push
+
+# Pull schema from Neon Serverless
+
+yarn pull
+
+# Check consistency of your migrations
+
+yarn check
+
 # Run Drizzle Studio (monitor data)
 
 yarn studio

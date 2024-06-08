@@ -8,4 +8,8 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
+  // migrations: {
+  //   table: 'migrations_custom', // default `__drizzle_migrations`,
+  //   schema: 'public', // used in PostgreSQL only and default to `drizzle`
+  // },
 })

@@ -11,6 +11,9 @@
     "generate": "npx drizzle-kit generate",
     "migrate": "npx drizzle-kit migrate",
     "push": "npx drizzle-kit push",
+    "pull": "npx drizzle-kit introspect",
+    "drop": "npx drizzle-kit drop",
+    "check": "npx drizzle-kit check",
     "studio": "npx drizzle-kit studio --port 5000"
   },
   "dependencies": {
