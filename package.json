@@ -2,15 +2,16 @@
   "name": "node-digital-shop",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "server.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "dev": "node --watch server.js",
+    "dev": "ts-node-dev --respawn --transpile-only server.ts",
     "generate": "npx drizzle-kit generate",
-    "migrate": "npx drizzle-kit migrate"
+    "migrate": "npx drizzle-kit migrate",
+    "push": "npx drizzle-kit push",
+    "studio": "npx drizzle-kit studio --port 5000"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.3",
