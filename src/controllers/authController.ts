@@ -12,7 +12,7 @@ import { find } from 'lodash'
 export const SECRET_KEY = process.env.SECRET_KEY!
 
 export const signup = async (req: Request, res: Response) => {
-  const { name, email, password, phoneNum, avatar, role } = req.body
+  const { name, email, password, role } = req.body
 
   const holderUser = await db.query.UsersTable.findFirst({
     where: eq(UsersTable.email, email),
@@ -26,8 +26,6 @@ export const signup = async (req: Request, res: Response) => {
     name,
     email,
     password: hashSync(password, 10),
-    phoneNum,
-    avatar,
     role,
   })
   res.json(newUser)
