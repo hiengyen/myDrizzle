@@ -1,13 +1,11 @@
-import dotenv from 'dotenv'
-dotenv.config()
-import express from 'express'
+import express, { ErrorRequestHandler } from 'express'
 import morgan from 'morgan'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 import compression from 'compression'
 import cors from 'cors'
 
-import router from './routes/index'
+import router from './routes'
 
 const app = express()
 
@@ -22,5 +20,9 @@ app.use(express.json())
 //init routes
 app.use('/', router)
 
-//init server
+//handle error
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {}
+
+app.use(errorHandler)
+
 export default app
