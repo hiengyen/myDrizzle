@@ -3,6 +3,7 @@ import { db } from '../dbs/db'
 import { InsertUser, UsersTable } from '../dbs/schema'
 import { eq } from 'drizzle-orm'
 import { hashSync } from 'bcrypt'
+import { BadRequestError } from '../utils/errorResponse'
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password, phoneNum, avatar, role } = req.body
 
@@ -11,7 +12,7 @@ export const signup = async (req: Request, res: Response) => {
   })
 
   if (holderUser) {
-    throw new Error('User already exists!')
+    throw new BadRequestError('Error:User already register !')
   }
 
   const newUser = await db.insert(UsersTable).values({
