@@ -17,8 +17,27 @@ export const UsersTable = pgTable('users', {
   phoneNum: varchar('phoneNumber', { length: 10 }),
   avatar: text('avatar'),
   role: UserRoles('role').default('CLIENT').notNull(),
-  createdAt: timestamp('createdAt').defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { precision: 6, withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updateAt: timestamp('update_at', { precision: 6, withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+export const KeyTokenTable = pgTable('keys', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('userId')
+    .notNull()
+    .references(() => UsersTable.id),
+  publicKey: text('publicKey').notNull(),
+  privateKey: text('privateKey').notNull(),
+  refreshTokenUsed: text('refreshTokenUsed').array(),
+  createdAt: timestamp('created_at', { precision: 6, withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updateAt: timestamp('update_at', { precision: 6, withTimezone: true })
+    .notNull()
+    .defaultNow(),
 })
 
 export type InsertUser = typeof UsersTable.$inferInsert
