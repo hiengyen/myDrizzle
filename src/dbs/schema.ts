@@ -24,6 +24,7 @@ export const UsersTable = pgTable('users', {
     .notNull()
     .defaultNow(),
 })
+
 export const KeyTokenTable = pgTable('keys', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('userId')

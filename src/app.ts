@@ -6,6 +6,7 @@ import compression from 'compression'
 import cors from 'cors'
 
 import router from './routes'
+import errorHandler from './middlewares/errorHandler'
 
 const app = express()
 
@@ -21,8 +22,5 @@ app.use(express.json())
 app.use('/', router)
 
 //handle error
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {}
-
 app.use(errorHandler)
-
 export default app
