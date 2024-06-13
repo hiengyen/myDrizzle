@@ -1,0 +1,157 @@
+import dotenv from 'dotenv'
+dotenv.config({ path: '.env' })
+import { Request, Response, NextFunction } from 'express'
+import { db } from '../dbs/db'
+import { UsersTable } from '../dbs/schema'
+import { and, eq } from 'drizzle-orm'
+import { compare, compareSync, hashSync } from 'bcrypt'
+import bcrypt from 'bcrypt'
+import { AuthFailureError, BadRequestError } from '../utils/errorResponse'
+import { INTERNAL_SERVER_ERROR, StatusCodes } from 'http-status-codes'
+import { JwtUtil } from '../utils/jwtUtil'
+import ms from 'ms'
+import { SuccessResponse } from '../utils/successResponse'
+
+export const AT_KEY = process.env.AT_SECRET_KEY
+export const RT_KEY = process.env.RT_SECRET_KEY
+
+const signup = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { name, email, password, role } = req.body
+
+    const holderUser: any = await db.query.UsersTable.findFirst({
+      where: eq(UsersTable.email, email),
+    })
+
+    if (holderUser) {
+      throw new BadRequestError('User already register !')
+    }
+
+    const newUser = await db.insert(UsersTable).values({
+      name,
+      email,
+      password: hashSync(password, 10),
+      role,
+    })
+
+    const findByEmail: any = await db.query.UsersTable.findFirst({
+      where: and(eq(UsersTable.email, req.body.email)),
+    })
+
+    const userInfo: any = {
+      id: await findByEmail.id,
+      email: await findByEmail.email,
+    }
+
+    //create AT, RT
+    const accessToken: any = await JwtUtil.generateToken(userInfo, AT_KEY, '1h')
+
+    const refreshToken: any = await JwtUtil.generateToken(
+      userInfo,
+      RT_KEY,
+      '14 days',
+    )
+
+    //set cookie
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: ms('14 days'),
+    })
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: ms('14 days'),
+    })
+
+    new SuccessResponse({
+      message: 'Sign-up API success',
+      metadata: {
+        info: newUser,
+        accessToken,
+        refreshToken,
+      },
+    }).send(res)
+  } catch (error) {
+    console.log(error)
+  }
+}
+const login = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const findByEmail: any = await db.query.UsersTable.findFirst({
+      where: and(eq(UsersTable.email, req.body.email)),
+    })
+
+    if (!findByEmail) {
+      throw new BadRequestError('User does not exist !')
+    }
+    const match = compareSync(req.body.password, findByEmail.password)
+    if (!match) {
+      throw new AuthFailureError('Invalid password !')
+    }
+
+    //return info for store in LocalStorage
+    new SuccessResponse({
+      message: 'Login API success',
+    }).send(res)
+  } catch (error: any) {
+    console.log(error)
+  }
+}
+
+const logout = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie('accessToken')
+    res.status(StatusCodes.OK).json({ message: 'Logout API success!' })
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error)
+  }
+}
+
+const refreshToken = async (req: Request, res: Response) => {
+  try {
+    const refreshTokenFromCookie = req.cookies?.refreshToken
+
+    const refreshTokenDecoded: any = await JwtUtil.verifyToken(
+      refreshTokenFromCookie,
+      RT_KEY,
+    )
+
+    //create new AT
+
+    const userInfo: any = {
+      id: refreshTokenDecoded.id,
+      email: refreshTokenDecoded.email,
+    }
+
+    //create new AT
+    const accessToken: any = await JwtUtil.generateToken(userInfo, AT_KEY, '1h')
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: ms('14 days'),
+    })
+
+    //
+    new SuccessResponse({
+      message: 'Refresh Token API success.',
+      metadata: {
+        accessToken: accessToken,
+      },
+    }).send(res)
+  } catch (error: any) {
+    console.log(error)
+  }
+}
+
+export const userController = {
+  signup,
+  login,
+  logout,
+  refreshToken,
+}

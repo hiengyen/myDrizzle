@@ -1,7 +1,7 @@
 import express, { Request, Response, Router } from 'express'
 const router = express.Router()
-import auth from './auth'
+import userRoute from './v1/userRoute'
 
-router.use('/auth', auth)
+router.use('/v1/user', userRoute)
 router.get('/healthcheck', (req: Request, res: Response) => res.sendStatus(200))
-export default router
+export const API_v1 = router
