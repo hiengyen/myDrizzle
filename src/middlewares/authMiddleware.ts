@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
-import { AuthFailureError } from '../utils/errorResponse'
 import { JwtUtil } from '../utils/jwtUtil'
 import { AT_KEY } from '../controllers/userController'
 import logger from '../utils/logger'
-import { StatusCode } from '../utils/httpStatusCodes'
+import { StatusCodes } from 'http-status-codes'
 //Get and authorized accessToken receive from FE
 const isAuthorized = async (
   req: Request,
@@ -15,7 +14,9 @@ const isAuthorized = async (
   console.log('accessTokenFromCookie: ', accessTokenFromCookie)
   console.log('---')
   if (!accessTokenFromCookie) {
-    throw new AuthFailureError('Unauthorized! (Token not found)')
+    return res.status(StatusCodes.FORBIDDEN).json({
+      message: 'Unauthorized! (Token not found)',
+    })
   }
 
   try {
@@ -28,10 +29,14 @@ const isAuthorized = async (
     next()
   } catch (error: any) {
     if (error.message?.includes('jwt expired')) {
-      throw new AuthFailureError('Need use refresh token', StatusCode.GONE)
+      return res.status(StatusCodes.FORBIDDEN).json({
+        message: 'Unauthorized! (Token not found)',
+      })
     }
 
-    throw new AuthFailureError('Unauthorized! Please login...')
+    return res.status(StatusCodes.FORBIDDEN).json({
+      message: 'Unauthorized! (Please login ...)',
+    })
   }
 }
 

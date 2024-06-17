@@ -1,78 +1,9 @@
 {
-  "id": "c64b4384-5802-4cfb-98a5-873a9d32f31b",
+  "id": "bcf7642b-66fe-47d5-9d30-bf09be88fa67",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.keys": {
-      "name": "keys",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "userId": {
-          "name": "userId",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "publicKey": {
-          "name": "publicKey",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "privateKey": {
-          "name": "privateKey",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "refreshTokenUsed": {
-          "name": "refreshTokenUsed",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "update_at": {
-          "name": "update_at",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "keys_userId_users_id_fk": {
-          "name": "keys_userId_users_id_fk",
-          "tableFrom": "keys",
-          "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -120,17 +51,17 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'CLIENT'"
+          "default": "'client'"
         },
-        "created_at": {
-          "name": "created_at",
+        "createdAt": {
+          "name": "createdAt",
           "type": "timestamp (6) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "update_at": {
-          "name": "update_at",
+        "updateAt": {
+          "name": "updateAt",
           "type": "timestamp (6) with time zone",
           "primaryKey": false,
           "notNull": true,
@@ -156,8 +87,8 @@
       "name": "userRoles",
       "schema": "public",
       "values": [
-        "ADMIN",
-        "CLIENT"
+        "admin",
+        "client"
       ]
     }
   },
