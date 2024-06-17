@@ -43,10 +43,25 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       role,
     })
 
+    return res.status(StatusCodes.CREATED).json({
+      message: 'Sign-up API success',
+      info: newUser,
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
+const login = async (req: Request, res: Response, next: NextFunction) => {
+  try {
     const findByEmail: any = await db.query.UsersTable.findFirst({
       where: and(eq(UsersTable.email, req.body.email)),
     })
 
+    if (!findByEmail) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'User does not exist !',
+      })
+    }
     const userInfo: any = {
       id: await findByEmail.id,
       email: await findByEmail.email,
@@ -76,44 +91,26 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       maxAge: ms('14 days'),
     })
 
-    return res.status(StatusCodes.CREATED).json({
-      message: 'Sign-up API success',
-      metadata: {
-        info: newUser,
-        accessToken,
-        refreshToken,
-      },
-    })
-  } catch (error) {
-    console.log(error)
-  }
-}
-const login = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const findByEmail: any = await db.query.UsersTable.findFirst({
-      where: and(eq(UsersTable.email, req.body.email)),
-    })
-
-    if (!findByEmail) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'User does not exist !',
-        metadata: {
-          info: findByEmail,
-        },
-      })
-    }
-
     const match = compareSync(req.body.password, findByEmail.password)
     if (!match) {
       return res.status(StatusCodes.FORBIDDEN).json({
         message: 'Invalid password !',
-        metadata: {},
       })
     }
-
     //return info for store in LocalStorage
     return res.status(StatusCodes.OK).json({
       message: 'Login API success',
+      metadata: {
+        info: {
+          name: findByEmail.name,
+          email: findByEmail.email,
+          role: findByEmail.role,
+          createAt: findByEmail.createAt,
+          updateAt: findByEmail.updateAt,
+        },
+        accessToken,
+        refreshToken,
+      },
     })
   } catch (error: any) {
     console.log(error)
