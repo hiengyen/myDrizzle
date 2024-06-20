@@ -3,7 +3,6 @@ import { JwtUtil } from '../utils/jwtUtil'
 import { AT_KEY } from '../controllers/userController'
 import logger from '../utils/logger'
 import { StatusCodes } from 'http-status-codes'
-import { sortedUniq } from 'lodash'
 import { UserInPayLoad } from '../model/jwt'
 import { JsonWebTokenError, JwtPayload } from 'jsonwebtoken'
 
@@ -29,7 +28,7 @@ const isAuthorized = async (
       AT_KEY
     )
 
-    logger.info('User is authorized')
+    logger.info('Access token existence: true')
     next()
   } catch (error: any) {
     logger.error('authorize checking middleware: ' + error.message)
@@ -52,27 +51,33 @@ const accessTokenFromExactUser = async (
 ) => {
   try {
     const accessTokenFromCookie = await req.cookies?.accessToken
-    logger.info(`access token: ${req.cookies.accessToken}`)
     const accessTokenDecoded: string | JwtPayload | null =
-      await JwtUtil.verifyToken(accessTokenFromCookie, AT_KEY)
-    const userIDInToken: UserInPayLoad = accessTokenDecoded as UserInPayLoad
+      await JwtUtil.decodeToken(accessTokenFromCookie)
+    const userInToken: UserInPayLoad = accessTokenDecoded as UserInPayLoad
     const userIDInHeader: string | undefined = req.header('user-id')
 
-    if (!userIDInHeader) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Request header lack of user id!',
+    if (!accessTokenFromCookie) {
+      logger.error('Access token not found')
+      return res.status(StatusCodes.FORBIDDEN).json({
+        message: 'Unauthorized! (Token not found)',
       })
     }
-    if (userIDInToken.id !== userIDInHeader) {
+    if (!userIDInHeader) {
+      logger.error('Request header missing user id')
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Request header missing user id!',
+      })
+    }
+    if (userInToken.id !== userIDInHeader) {
       logger.error(
-        `header userID: '${userIDInHeader}' differ from userID in token: '${userIDInToken.id}'`
+        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
       )
       return res.status(StatusCodes.FORBIDDEN).json({
         message: 'Request from invalid id!',
       })
     }
 
-    logger.info('Access token middleware success')
+    logger.info('Access token middleware successed')
     next()
   } catch (error: any) {
     logger.error('Access token middleware: ' + error.message)
@@ -97,27 +102,33 @@ const refreshTokenFromExactUser = async (
     const refreshTokenFromCookie = req.cookies?.refreshToken
 
     const refreshTokenDecoded: string | JwtPayload | null =
-      await JwtUtil.verifyToken(refreshTokenFromCookie, AT_KEY)
+      await JwtUtil.decodeToken(refreshTokenFromCookie)
 
-    const userIDInToken: UserInPayLoad = refreshTokenDecoded as UserInPayLoad
+    const userInToken: UserInPayLoad = refreshTokenDecoded as UserInPayLoad
     const userIDInHeader: string | undefined = req.header('user-id')
 
-    if (!userIDInHeader) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Request header lack of user id!',
+    if (!refreshTokenFromCookie) {
+      logger.error('Refresh token not found')
+      return res.status(StatusCodes.FORBIDDEN).json({
+        message: 'Unauthorized! (Token not found)',
       })
     }
-
-    if (userIDInToken.id !== userIDInHeader) {
+    if (!userIDInHeader) {
+      logger.error('Request header missing user id')
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Request header missing user id!',
+      })
+    }
+    if (userInToken.id !== userIDInHeader) {
       logger.error(
-        `header userID: '${userIDInHeader}' differ from userID in token: '${userIDInToken.id}'`
+        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
       )
       return res.status(StatusCodes.FORBIDDEN).json({
         message: 'Request from invalid id!',
       })
     }
 
-    logger.info('Refresh token middleware success')
+    logger.info('Refresh token middleware successed')
     next()
   } catch (error: any) {
     logger.error('Refresh token middleware: ' + error.message)

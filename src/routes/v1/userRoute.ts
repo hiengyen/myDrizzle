@@ -8,7 +8,7 @@ const router = express.Router()
 router.post('/signup', userController.signup)
 router.post('/login', userController.login)
 router.delete('/logout', userController.logout)
-router.post(
+router.get(
   '/refresh',
   authMiddleware.accessTokenFromExactUser,
   authMiddleware.refreshTokenFromExactUser,
