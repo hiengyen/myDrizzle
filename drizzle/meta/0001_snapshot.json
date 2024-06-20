@@ -1,6 +1,6 @@
 {
-  "id": "bcf7642b-66fe-47d5-9d30-bf09be88fa67",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "fbfed465-8765-436f-9a8a-531a3c1f31ef",
+  "prevId": "bcf7642b-66fe-47d5-9d30-bf09be88fa67",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -52,6 +52,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'client'"
+        },
+        "refreshTokenUsed": {
+          "name": "refreshTokenUsed",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
