@@ -5,6 +5,7 @@ import logger from '../utils/logger'
 import { StatusCodes } from 'http-status-codes'
 import { UserInPayLoad } from '../model/jwt'
 import { JsonWebTokenError, JwtPayload } from 'jsonwebtoken'
+import { ErrorResponse } from '../utils/error.response'
 
 //Get and authorized accessToken receive from FE
 const isAuthorized = async (
@@ -12,14 +13,13 @@ const isAuthorized = async (
   res: Response,
   next: NextFunction
 ) => {
-  //
   const accessTokenFromCookie = req.cookies?.accessToken
-  console.log('accessTokenFromCookie: ', accessTokenFromCookie)
-  console.log('---')
   if (!accessTokenFromCookie) {
-    return res.status(StatusCodes.FORBIDDEN).json({
-      message: 'Unauthorized! (Token not found)',
-    })
+    throw new ErrorResponse(
+      'Unauthorized! (Token not found)',
+      StatusCodes.UNAUTHORIZED,
+      'Unauthorized! (Token not found)'
+    )
   }
 
   try {
@@ -28,18 +28,25 @@ const isAuthorized = async (
       AT_KEY
     )
 
-    logger.info('Access token existence: true')
+    logger.info('Access token verification successed')
     next()
   } catch (error: any) {
-    logger.error('authorize checking middleware: ' + error.message)
+    if (error instanceof ErrorResponse) {
+      logger.error('Validate acceess token failure: ' + error.loggerMs)
+      return res.status(error.status).json({
+        message: error.message,
+      })
+    }
+
+    logger.error('Validate access token failure: ' + error?.message)
     if (error.message?.includes('jwt expired')) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({
+      return res.status(StatusCodes.FORBIDDEN).json({
         message: 'Unauthorized! (Token had been expired)',
       })
     }
 
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Unhandle jwt error',
+      message: 'Token validation error',
     })
   }
 }
@@ -57,38 +64,40 @@ const accessTokenFromExactUser = async (
     const userIDInHeader: string | undefined = req.header('user-id')
 
     if (!accessTokenFromCookie) {
-      logger.error('Access token not found')
-      return res.status(StatusCodes.FORBIDDEN).json({
-        message: 'Unauthorized! (Token not found)',
-      })
+      throw new ErrorResponse(
+        'Unauthorized request!',
+        StatusCodes.UNAUTHORIZED,
+        'Access token not found'
+      )
     }
     if (!userIDInHeader) {
-      logger.error('Request header missing user id')
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Request header missing user id!',
-      })
+      throw new ErrorResponse(
+        'Request header missing user id',
+        StatusCodes.BAD_REQUEST,
+        'Request header missing user id!'
+      )
     }
     if (userInToken.id !== userIDInHeader) {
-      logger.error(
-        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
+      throw new ErrorResponse(
+        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`,
+        StatusCodes.BAD_REQUEST,
+        'Request header missing user id!'
       )
-      return res.status(StatusCodes.FORBIDDEN).json({
-        message: 'Request from invalid id!',
-      })
     }
 
     logger.info('Access token middleware successed')
     next()
   } catch (error: any) {
-    logger.error('Access token middleware: ' + error.message)
-    if (error instanceof JsonWebTokenError) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({
-        message: 'Unauthorized! (Access token error...)',
+    if (error instanceof ErrorResponse) {
+      logger.error('Access token middleware failure: ' + error.loggerMs)
+      return res.status(error.status).json({
+        message: error.message,
       })
     }
 
+    logger.error('Cannot run cheking access token')
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Other error!',
+      message: 'Token error',
     })
   }
 }
@@ -108,38 +117,40 @@ const refreshTokenFromExactUser = async (
     const userIDInHeader: string | undefined = req.header('user-id')
 
     if (!refreshTokenFromCookie) {
-      logger.error('Refresh token not found')
-      return res.status(StatusCodes.FORBIDDEN).json({
-        message: 'Unauthorized! (Token not found)',
-      })
+      throw new ErrorResponse(
+        'Unauthorized request!',
+        StatusCodes.UNAUTHORIZED,
+        'Refresh token not found'
+      )
     }
     if (!userIDInHeader) {
-      logger.error('Request header missing user id')
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Request header missing user id!',
-      })
+      throw new ErrorResponse(
+        'Request header missing user id',
+        StatusCodes.BAD_REQUEST,
+        'Request header missing user id!'
+      )
     }
     if (userInToken.id !== userIDInHeader) {
-      logger.error(
-        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
+      throw new ErrorResponse(
+        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`,
+        StatusCodes.BAD_REQUEST,
+        'Request header missing user id!'
       )
-      return res.status(StatusCodes.FORBIDDEN).json({
-        message: 'Request from invalid id!',
-      })
     }
 
     logger.info('Refresh token middleware successed')
     next()
   } catch (error: any) {
-    logger.error('Refresh token middleware: ' + error.message)
-    if (error instanceof JsonWebTokenError) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({
-        message: 'Unauthorized! (Refresh token error...)',
+    if (error instanceof ErrorResponse) {
+      logger.error('Refresh token middleware failure: ' + error.loggerMs)
+      return res.status(error.status).json({
+        message: error.message,
       })
     }
 
+    logger.error('Cannot run cheking refresh token')
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Other error!',
+      message: 'Token error!',
     })
   }
 }

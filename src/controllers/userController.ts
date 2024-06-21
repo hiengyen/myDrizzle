@@ -10,12 +10,22 @@ import { JwtUtil } from '../utils/jwtUtil'
 import ms from 'ms'
 import logger from '../utils/logger'
 import { User } from '../model/user'
-import { isUser } from '../utils/typeGuard'
 import { JwtPayload } from 'jsonwebtoken'
 import { UserInPayLoad } from '../model/jwt'
+import { ErrorResponse } from '../utils/error.response'
 
 export const AT_KEY = process.env.AT_SECRET_KEY
 export const RT_KEY = process.env.RT_SECRET_KEY
+
+/**
+ * Make user registration
+ * If input email had been registed by other account, then response 'user already exist'
+ * If not, add user info to the DB with no provided token yet
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, email, password, role } = req.body
@@ -25,9 +35,11 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     })
 
     if (holderUser) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'User already exist !',
-      })
+      throw new ErrorResponse(
+        'User already exist',
+        StatusCodes.BAD_REQUEST,
+        'User already exist'
+      )
     }
 
     const newUser = await db.insert(UsersTable).values({
@@ -37,17 +49,32 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       role,
     })
 
+    logger.info(`User with email ${email} signed up successfull`)
     return res.status(StatusCodes.CREATED).json({
-      message: 'Sign-up API success',
+      message: 'Sign-up success',
     })
   } catch (error: any) {
-    logger.error(error?.message)
+    logger.error('Sign up failure: ' + error.loggerMs && error?.message)
+    if (error instanceof ErrorResponse) {
+      return res.status(error.status).json({
+        message: error.message,
+      })
+    }
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Cannot signup!',
+      message: 'Cannot signup',
     })
   }
 }
 
+/**
+ * Log user in the account
+ * If the current tokens are still valid, then return `Already login`
+ * If not, create tokens and send back in header; body'response will go with the user'information
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
 const login = async (req: Request, res: Response, next: NextFunction) => {
   const accessTokenFromCookie = req.cookies?.accessToken
   const refreshTokenFromCookie = req.cookies?.refreshToken
@@ -77,6 +104,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       })
     }
 
+    // Check if refresh token already existed in DB
     if (userData.refreshTokenUsed) {
       const newRefreshTokenBucket: string[] = userData.refreshTokenUsed.filter(
         token => token === refreshTokenFromCookie
@@ -93,25 +121,29 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       message: 'User already been login !',
     })
   } catch (error: any) {
+    // Main logic of login
     try {
-      logger.info(`login...`)
-      // Search with email
+      logger.info(`loging in...`)
       const findByEmail: any = await db.query.UsersTable.findFirst({
         where: and(eq(UsersTable.email, req.body.email)),
       })
 
       if (!findByEmail) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'User does not exist !',
-        })
+        throw new ErrorResponse(
+          `Wrong email`,
+          StatusCodes.BAD_REQUEST,
+          `User with ${req.body.email} does not exist `
+        )
       }
 
       // Check whether password is valid
       const match = compareSync(req.body.password, findByEmail.password)
       if (!match) {
-        return res.status(StatusCodes.FORBIDDEN).json({
-          message: 'Invalid password !',
-        })
+        throw new ErrorResponse(
+          'Wrong password',
+          StatusCodes.BAD_REQUEST,
+          `Wrong password`
+        )
       }
 
       const userInfo: any = {
@@ -120,17 +152,25 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       }
 
       //create AT, RT
-      const accessToken: any = await JwtUtil.generateToken(
+      const accessToken: string | undefined = await JwtUtil.generateToken(
         userInfo,
         AT_KEY,
         '5 minutes'
       )
 
-      const refreshToken: any = await JwtUtil.generateToken(
+      const refreshToken: string | undefined = await JwtUtil.generateToken(
         userInfo,
         RT_KEY,
         '14 days'
       )
+
+      if (!accessToken || !refreshToken) {
+        throw new ErrorResponse(
+          'Token error',
+          StatusCodes.BAD_REQUEST,
+          `Cannot create token`
+        )
+      }
 
       //set two token to cookie
       res.cookie('accessToken', accessToken, {
@@ -168,7 +208,12 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         },
       })
     } catch (error: any) {
-      logger.error(error?.message)
+      logger.error('Login failure: ' + error.loggerMs && error?.message)
+      if (error instanceof ErrorResponse) {
+        return res.status(error.status).json({
+          message: error.message,
+        })
+      }
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: 'Cannot login',
       })
@@ -189,7 +234,11 @@ const logout = async (req: Request, res: Response) => {
     const refreshTokenDecoded: string | JwtPayload | null =
       await JwtUtil.decodeToken(refreshTokenFromCookie)
     if (!refreshTokenDecoded) {
-      throw new Error('Missing refresh Token')
+      throw new ErrorResponse(
+        'Missing token',
+        StatusCodes.BAD_REQUEST,
+        'Missing refresh token'
+      )
     }
     const userInToken: UserInPayLoad = refreshTokenDecoded as UserInPayLoad
 
@@ -201,22 +250,18 @@ const logout = async (req: Request, res: Response) => {
       })
 
     if (!userData) {
-      logger.error('User none exists!')
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'User none exists!',
-      })
+      throw new ErrorResponse(
+        'User none exist',
+        StatusCodes.BAD_REQUEST,
+        'User none exist'
+      )
     }
 
     //Delete current refresh token from DB if it exist
     if (userData.refreshTokenUsed) {
-      logger.info(`Delete current refresh token:\n ${refreshTokenFromCookie}`)
-      logger.info(`refresh token list before:\n ${userData.refreshTokenUsed}`)
       const newRefreshTokenBucket: string[] = userData.refreshTokenUsed.filter(
         token => token !== refreshTokenFromCookie
       )
-      logger.info(`refresh token list after:\n ${newRefreshTokenBucket}`)
-      // const finalSql: SQL = sql.join(newRefreshTokenBucket, sql.raw(' '))
-
       await db
         .update(UsersTable)
         .set({
@@ -227,12 +272,16 @@ const logout = async (req: Request, res: Response) => {
     }
 
     logger.info('Logout success')
-
     res.clearCookie('accessToken')
     res.clearCookie('refreshToken')
     return res.status(StatusCodes.OK).json({ message: 'Logout API success!' })
   } catch (error: any) {
-    logger.error(error?.message)
+    logger.error('Logout failure: ' + error.loggerMs && error?.message)
+    if (error instanceof ErrorResponse) {
+      return res.status(error.status).json({
+        message: error.message,
+      })
+    }
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: 'Cannot logout',
     })
@@ -305,12 +354,17 @@ const refreshToken = async (req: Request, res: Response) => {
 
     logger.info('New accessToken: ' + accessToken)
     return res.status(StatusCodes.OK).json({
-      message: 'Access Token API successed.',
+      message: 'Refresh access token',
     })
   } catch (error: any) {
-    logger.error(error?.message)
+    logger.error('Refresh token failure: ' + error.loggerMs && error?.message)
+    if (error instanceof ErrorResponse) {
+      return res.status(error.status).json({
+        message: error.message,
+      })
+    }
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Cannot refresh!',
+      message: 'Cannot refresh token',
     })
   }
 }
@@ -338,9 +392,11 @@ const updateInfo = async (req: Request, res: Response) => {
         user => user.email === userData.email && user.id !== userID
       )
     ) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'This email is being used by another account!',
-      })
+      throw new ErrorResponse(
+        'This email is being used by another account',
+        StatusCodes.BAD_REQUEST,
+        'This email has already been registeree'
+      )
     }
 
     const resUser = await db
@@ -365,7 +421,12 @@ const updateInfo = async (req: Request, res: Response) => {
       infor: resUser,
     })
   } catch (error: any) {
-    logger.error(`Update fail: \n${error?.message}`)
+    logger.error('Update user failure: ' + error.loggerMs && error?.message)
+    if (error instanceof ErrorResponse) {
+      return res.status(error.status).json({
+        message: error.message,
+      })
+    }
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json('Cannot update infor')
