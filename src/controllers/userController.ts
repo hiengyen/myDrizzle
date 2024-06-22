@@ -43,18 +43,17 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         StatusCodes.BAD_REQUEST,
         'User already exist',
       )
-
-      const newUser = await db.insert(UsersTable).values({
-        name,
-        email,
-        password: hashSync(password, 10),
-        role,
-      })
-      logger.info(`User with email ${email} signed up successfull`)
-      return res.status(StatusCodes.CREATED).json({
-        message: 'Sign-up success',
-      })
     }
+    const newUser = await db.insert(UsersTable).values({
+      name,
+      email,
+      password: hashSync(password, 10),
+      role,
+    })
+    logger.info(`User with email ${email} signed up successfull`)
+    return res.status(StatusCodes.CREATED).json({
+      message: 'Sign-up success',
+    })
   } catch (error: any) {
     logger.error('Sign up failure: ' + error.loggerMs && error?.message)
     if (error instanceof ErrorResponse) {
