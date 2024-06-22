@@ -17,12 +17,14 @@ export const UsersTable = pgTable('users', {
   phoneNum: varchar('phoneNumber', { length: 10 }),
   avatar: text('avatar'),
   role: UserRoles('role').default('client').notNull(),
+  refreshTokenUsed: text('refreshTokenUsed').array(),
   createdAt: timestamp('createdAt', { precision: 6, withTimezone: true })
     .notNull()
     .defaultNow(),
   updateAt: timestamp('updateAt', { precision: 6, withTimezone: true })
     .notNull()
-    .defaultNow(),
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 })
 
 // export const KeyTokenTable = pgTable('keys', {

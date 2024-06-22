@@ -9,7 +9,7 @@ tokenLife
 const generateToken = async (
   userInfo: any,
   secretSignature: any,
-  tokenLife: any,
+  tokenLife: any
 ) => {
   try {
     return JWT.sign(userInfo, secretSignature, {
@@ -27,7 +27,15 @@ const verifyToken = async (token: any, secretSignature: any) => {
   }
 }
 
+const decodeToken = async (token: any) => {
+  try {
+    return JWT.decode(token)
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
 export const JwtUtil = {
   generateToken,
   verifyToken,
+  decodeToken,
 }
