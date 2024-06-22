@@ -20,4 +20,10 @@ router.post(
   authMiddleware.accessTokenFromExactUser,
   userController.updateInfo
 )
+router.get(
+  '/me',
+  authMiddleware.isAuthorized,
+  authMiddleware.accessTokenFromExactUser,
+  userController.getUserWithJWT
+)
 export default router
