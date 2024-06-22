@@ -26,6 +26,7 @@ export const UsersTable = pgTable('users', {
     .defaultNow()
     .$onUpdate(() => new Date()),
 })
+
 // export const KeyTokenTable = pgTable('keys', {
 //   id: uuid('id').primaryKey().defaultRandom(),
 //   userId: uuid('userId')

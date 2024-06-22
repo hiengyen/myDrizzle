@@ -20,6 +20,7 @@ const isAuthorized = async (
       StatusCodes.UNAUTHORIZED,
       'Unauthorized! (Token not found)'
     )
+
   }
 
   try {
@@ -41,6 +42,7 @@ const isAuthorized = async (
     logger.error('Validate access token failure: ' + error?.message)
     if (error.message?.includes('jwt expired')) {
       return res.status(StatusCodes.FORBIDDEN).json({
+
         message: 'Unauthorized! (Token had been expired)',
       })
     }
@@ -151,6 +153,7 @@ const refreshTokenFromExactUser = async (
     logger.error('Cannot run cheking refresh token')
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: 'Token error!',
+
     })
   }
 }
