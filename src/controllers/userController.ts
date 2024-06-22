@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express'
 import { db } from '../dbs/db'
 import { UsersTable } from '../dbs/schema'
 
-import {and, eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 
 import { compareSync, hashSync } from 'bcrypt'
 import { StatusCodes, ReasonPhrases } from 'http-status-codes'
@@ -41,27 +41,26 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       throw new ErrorResponse(
         'User already exist',
         StatusCodes.BAD_REQUEST,
-        'User already exist'
+        'User already exist',
       )
 
-
-    const newUser = await db.insert(UsersTable).values({
-      name,
-      email,
-      password: hashSync(password, 10),
-      role,
-    })
-    logger.info(`User with email ${email} signed up successfull`)
-    return res.status(StatusCodes.CREATED).json({
-      message: 'Sign-up success',
-    })
+      const newUser = await db.insert(UsersTable).values({
+        name,
+        email,
+        password: hashSync(password, 10),
+        role,
+      })
+      logger.info(`User with email ${email} signed up successfull`)
+      return res.status(StatusCodes.CREATED).json({
+        message: 'Sign-up success',
+      })
+    }
   } catch (error: any) {
     logger.error('Sign up failure: ' + error.loggerMs && error?.message)
     if (error instanceof ErrorResponse) {
       return res.status(error.status).json({
         message: error.message,
       })
-
     }
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: 'Cannot signup',
@@ -85,11 +84,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const accessTokenDecoded = await JwtUtil.verifyToken(
       accessTokenFromCookie,
-      AT_KEY
+      AT_KEY,
     )
     const refreshTokenDecoded = await JwtUtil.verifyToken(
       refreshTokenFromCookie,
-      RT_KEY
+      RT_KEY,
     )
     const userInToken: UserInPayLoad = refreshTokenDecoded as UserInPayLoad
 
@@ -110,7 +109,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     // Check if refresh token already existed in DB
     if (userData.refreshTokenUsed) {
       const newRefreshTokenBucket: string[] = userData.refreshTokenUsed.filter(
-        token => token === refreshTokenFromCookie
+        token => token === refreshTokenFromCookie,
       )
       if (newRefreshTokenBucket.length === 0) {
         throw new Error()
@@ -122,7 +121,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     logger.info(`User already been login`)
     return res.status(StatusCodes.FORBIDDEN).json({
       message: 'User already been login !',
-
     })
   } catch (error: any) {
     // Main logic of login
@@ -136,7 +134,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         throw new ErrorResponse(
           `Wrong email`,
           StatusCodes.BAD_REQUEST,
-          `User with ${req.body.email} does not exist `
+          `User with ${req.body.email} does not exist `,
         )
       }
 
@@ -146,7 +144,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         throw new ErrorResponse(
           'Wrong password',
           StatusCodes.BAD_REQUEST,
-          `Wrong password`
+          `Wrong password`,
         )
       }
 
@@ -159,20 +157,20 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       const accessToken: string | undefined = await JwtUtil.generateToken(
         userInfo,
         AT_KEY,
-        '5 minutes'
+        '5 minutes',
       )
 
       const refreshToken: string | undefined = await JwtUtil.generateToken(
         userInfo,
         RT_KEY,
-        '14 days'
+        '14 days',
       )
 
       if (!accessToken || !refreshToken) {
         throw new ErrorResponse(
           'Token error',
           StatusCodes.BAD_REQUEST,
-          `Cannot create token`
+          `Cannot create token`,
         )
       }
 
@@ -241,7 +239,7 @@ const logout = async (req: Request, res: Response) => {
       throw new ErrorResponse(
         'Missing token',
         StatusCodes.BAD_REQUEST,
-        'Missing refresh token'
+        'Missing refresh token',
       )
     }
     const userInToken: UserInPayLoad = refreshTokenDecoded as UserInPayLoad
@@ -257,14 +255,14 @@ const logout = async (req: Request, res: Response) => {
       throw new ErrorResponse(
         'User none exist',
         StatusCodes.BAD_REQUEST,
-        'User none exist'
+        'User none exist',
       )
     }
 
     //Delete current refresh token from DB if it exist
     if (userData.refreshTokenUsed) {
       const newRefreshTokenBucket: string[] = userData.refreshTokenUsed.filter(
-        token => token !== refreshTokenFromCookie
+        token => token !== refreshTokenFromCookie,
       )
       await db
         .update(UsersTable)
@@ -325,7 +323,7 @@ const refreshToken = async (req: Request, res: Response) => {
       !userData.refreshTokenUsed.find(token => token === refreshTokenFromCookie)
     ) {
       logger.error(
-        'Unknown refresh token: auto clear all refresh token in database.'
+        'Unknown refresh token: auto clear all refresh token in database.',
       )
       await db
         .update(UsersTable)
@@ -347,7 +345,7 @@ const refreshToken = async (req: Request, res: Response) => {
     const accessToken: any = await JwtUtil.generateToken(
       userInfo,
       AT_KEY,
-      '5 minutes'
+      '5 minutes',
     )
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
@@ -393,13 +391,13 @@ const updateInfo = async (req: Request, res: Response) => {
 
     if (
       holderUsers?.find(
-        user => user.email === userData.email && user.id !== userID
+        user => user.email === userData.email && user.id !== userID,
       )
     ) {
       throw new ErrorResponse(
         'This email is being used by another account',
         StatusCodes.BAD_REQUEST,
-        'This email has already been registeree'
+        'This email has already been registeree',
       )
     }
 
@@ -424,7 +422,6 @@ const updateInfo = async (req: Request, res: Response) => {
       message: 'Update successed',
       infor: resUser,
     })
-
   } catch (error: any) {
     logger.error('Update user failure: ' + error.loggerMs && error?.message)
     if (error instanceof ErrorResponse) {
