@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express'
 import { db } from '../dbs/db'
 import { UsersTable } from '../dbs/schema'
 
-import {and, eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 
 import { compareSync, hashSync } from 'bcrypt'
 import { StatusCodes, ReasonPhrases } from 'http-status-codes'
@@ -43,7 +43,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         StatusCodes.BAD_REQUEST,
         'User already exist'
       )
-
+    }
 
     const newUser = await db.insert(UsersTable).values({
       name,
@@ -61,7 +61,6 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(error.status).json({
         message: error.message,
       })
-
     }
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: 'Cannot signup',
@@ -122,7 +121,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     logger.info(`User already been login`)
     return res.status(StatusCodes.FORBIDDEN).json({
       message: 'User already been login !',
-
     })
   } catch (error: any) {
     // Main logic of login
@@ -424,7 +422,6 @@ const updateInfo = async (req: Request, res: Response) => {
       message: 'Update successed',
       infor: resUser,
     })
-
   } catch (error: any) {
     logger.error('Update user failure: ' + error.loggerMs && error?.message)
     if (error instanceof ErrorResponse) {
