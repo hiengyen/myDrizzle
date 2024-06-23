@@ -10,6 +10,7 @@ import {
   UserUpdateDTO,
   User,
   UserInsertDTO,
+  UserResponseSummaryDTO,
 } from '../dto/userDTO'
 import jwtService from '../services/jwtService'
 
@@ -139,10 +140,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   // Main logic of login
   try {
     logger.info(`loging in...`)
-    const validUser: UserResponseDTO = await userService.getValidUser(
-      req.body.email,
-      req.body.password
-    )
+    const validUser: UserResponseSummaryDTO =
+      await userService.getValidUserResponseSummary(
+        req.body.email,
+        req.body.password
+      )
 
     const userInPayLoad: { id: string; role: string } = {
       id: validUser.id,
@@ -351,7 +353,7 @@ const updateInfo = async (req: Request, res: Response) => {
       userData.email,
       userID
     )
-    if (!checkEmailInUsed) {
+    if (checkEmailInUsed) {
       throw new ErrorResponse(
         'This email is being used by another account',
         StatusCodes.CONFLICT,
@@ -398,8 +400,8 @@ const getUserWithJWT = async (req: Request, res: Response) => {
       accessTokenDecoded as UserInTokenPayloadDTO
 
     logger.info(accessTokenPayload.id)
-    const userInfo: UserResponseDTO | undefined =
-      await userService.getUserResponseByID(accessTokenPayload.id)
+    const userInfo: UserResponseSummaryDTO | undefined =
+      await userService.getUserResponseSummaryByID(accessTokenPayload.id)
 
     if (!userInfo) {
       throw new ErrorResponse(

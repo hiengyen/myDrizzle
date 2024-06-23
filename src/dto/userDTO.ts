@@ -11,6 +11,13 @@ interface UserResponseDTO {
   updateAt: Date
 }
 
+interface UserResponseSummaryDTO {
+  id: string
+  name: string
+  avatar: string | null
+  role: string
+}
+
 interface User {
   id: string
   name: string
@@ -53,5 +60,6 @@ export {
   UserUpdateDTO,
   UserInsertDTO,
   UserInTokenPayloadDTO,
+  UserResponseSummaryDTO,
   User,
 }

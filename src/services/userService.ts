@@ -10,6 +10,7 @@ import {
   UserUpdateDTO,
   User,
   UserInsertDTO,
+  UserResponseSummaryDTO,
 } from '../dto/userDTO'
 import logger from '../utils/logger'
 
@@ -30,10 +31,10 @@ const getUserByEmail = async (email: string): Promise<User | undefined> => {
   return holderUser
 }
 
-const getValidUser = async (
+const getValidUserResponseSummary = async (
   email: string,
   password: string
-): Promise<UserResponseDTO> => {
+): Promise<UserResponseSummaryDTO> => {
   const findByEmail: User | undefined = await getUserByEmail(email)
 
   if (!findByEmail) {
@@ -54,23 +55,29 @@ const getValidUser = async (
     )
   }
 
-  const userResponseDTO: UserResponseDTO = {
+  const user: UserResponseSummaryDTO = {
     id: findByEmail.id,
     name: findByEmail.name,
-    email: findByEmail.email,
-    phoneNum: findByEmail.phoneNum,
     avatar: findByEmail.avatar,
     role: findByEmail.role,
-    createdAt: findByEmail.createdAt,
-    updateAt: findByEmail.updateAt,
   }
-  return userResponseDTO
+  return user
 }
 
 const getUserResponseByID = async (
   userID: string
 ): Promise<UserResponseDTO | undefined> => {
   const holderUser: UserResponseDTO | undefined =
+    await db.query.UsersTable.findFirst({
+      where: eq(UsersTable.id, userID),
+    })
+  return holderUser
+}
+
+const getUserResponseSummaryByID = async (
+  userID: string
+): Promise<UserResponseSummaryDTO | undefined> => {
+  const holderUser: UserResponseSummaryDTO | undefined =
     await db.query.UsersTable.findFirst({
       where: eq(UsersTable.id, userID),
     })
@@ -112,6 +119,13 @@ const updateUserInfo = async (
   return resUser
 }
 
+/**
+ * Check if input email had been used by another account or not
+ *
+ * @param email
+ * @param userID
+ * @returns true if email has been used, false if not
+ */
 const checkEmailInUsed = async (
   email: string,
   userID: string
@@ -120,9 +134,10 @@ const checkEmailInUsed = async (
     where: eq(UsersTable.email, email),
   })
 
-  const result = holderUsers.find(
+  const result: UserResponseDTO | undefined = holderUsers.find(
     user => user.email === email && user.id !== userID
   )
+  logger.info(`result: ${result}`)
   return result !== undefined
 }
 
@@ -185,9 +200,10 @@ const clearUserRefreshTokenUsed = async (userID: string) => {
 }
 
 export default {
-  getValidUser,
-  getUserResponseByEmail,
+  getValidUserResponseSummary,
   getUserResponseByID,
+  getUserResponseByEmail,
+  getUserResponseSummaryByID,
   insertNewUser,
   getUserRefreshTokenUsed,
   deleteRefreshToken,

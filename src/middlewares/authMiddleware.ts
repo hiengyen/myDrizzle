@@ -84,9 +84,9 @@ const accessTokenFromExactUser = async (
     }
     if (userInToken.id !== userIDInHeader) {
       throw new ErrorResponse(
-        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`,
+        'header user-id invalid!',
         StatusCodes.BAD_REQUEST,
-        'header user-id invalid!'
+        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
       )
     }
 
@@ -137,9 +137,9 @@ const refreshTokenFromExactUser = async (
     }
     if (userInToken.id !== userIDInHeader) {
       throw new ErrorResponse(
-        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`,
+        'header user-id invalid!',
         StatusCodes.BAD_REQUEST,
-        'header user-id invalid!'
+        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
       )
     }
 
