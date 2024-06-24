@@ -1,5 +1,5 @@
 {
-  "id": "c71db4b9-fb99-4584-9dc0-fe2c972c3d30",
+  "id": "dd231348-308d-48d2-b05e-8d63e2c567b7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -349,6 +349,69 @@
           "tableTo": "productItems",
           "columnsFrom": [
             "itemID"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.productAttribute": {
+      "name": "productAttribute",
+      "schema": "",
+      "columns": {
+        "productID": {
+          "name": "productID",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "optionID": {
+          "name": "optionID",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (6) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updateAt": {
+          "name": "updateAt",
+          "type": "timestamp (6) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "productAttribute_productID_products_id_fk": {
+          "name": "productAttribute_productID_products_id_fk",
+          "tableFrom": "productAttribute",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productID"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "productAttribute_optionID_attributeOption_id_fk": {
+          "name": "productAttribute_optionID_attributeOption_id_fk",
+          "tableFrom": "productAttribute",
+          "tableTo": "attributeOption",
+          "columnsFrom": [
+            "optionID"
           ],
           "columnsTo": [
             "id"
@@ -871,7 +934,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'client'"
+          "default": "'CLIENT'"
         },
         "refreshTokenUsed": {
           "name": "refreshTokenUsed",
@@ -913,26 +976,26 @@
       "name": "invoiceStatus",
       "schema": "public",
       "values": [
-        "new",
-        "shipping",
-        "done",
-        "abort"
+        "NEW",
+        "SHIPPING",
+        "DONE",
+        "ABORT"
       ]
     },
     "public.paymentMethod": {
       "name": "paymentMethod",
       "schema": "public",
       "values": [
-        "cod",
-        "banking"
+        "COD",
+        "BANKING"
       ]
     },
     "public.userRoles": {
       "name": "userRoles",
       "schema": "public",
       "values": [
-        "admin",
-        "client"
+        "ADMIN",
+        "CLIENT"
       ]
     }
   },

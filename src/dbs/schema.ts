@@ -10,13 +10,13 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core'
 
-export const UserRoles = pgEnum('userRoles', ['admin', 'client'])
-export const PaymentMethod = pgEnum('paymentMethod', ['cod', 'banking'])
+export const UserRoles = pgEnum('userRoles', ['ADMIN', 'CLIENT'])
+export const PaymentMethod = pgEnum('paymentMethod', ['COD', 'BANKING'])
 export const InvoiceStatus = pgEnum('invoiceStatus', [
-  'new',
-  'shipping',
-  'done',
-  'abort',
+  'NEW',
+  'SHIPPING',
+  'DONE',
+  'ABORT',
 ])
 
 export const CategoryTable = pgTable('categories', {
@@ -72,11 +72,35 @@ export const AttributeTypeTable = pgTable('attributeType', {
     .$onUpdate(() => new Date()),
 })
 export const AttributeOptionTable = pgTable('attributeOption', {
-  providerID: uuid('id').primaryKey().defaultRandom(),
+  optionID: uuid('id').primaryKey().defaultRandom(),
   optionValue: text('value').notNull(),
   typeID: uuid('typeID')
     .notNull()
     .references((): any => AttributeTypeTable.typeID),
+})
+
+export const ProductAttributeTable = pgTable('productAttribute', {
+  productID: uuid('productID')
+    .notNull()
+    .references((): any => ProductTable.id),
+  optionID: uuid('optionID')
+    .notNull()
+    .references((): any => AttributeOptionTable.optionID),
+  createdAt: timestamp('createdAt', {
+    mode: 'date',
+    precision: 6,
+    withTimezone: true,
+  })
+    .notNull()
+    .defaultNow(),
+  updateAt: timestamp('updateAt', {
+    mode: 'date',
+    precision: 6,
+    withTimezone: true,
+  })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 })
 
 export const UsersTable = pgTable('users', {
@@ -86,7 +110,7 @@ export const UsersTable = pgTable('users', {
   password: varchar('password', { length: 255 }).notNull(),
   phoneNum: varchar('phoneNumber', { length: 10 }),
   avatar: text('avatar'),
-  role: UserRoles('role').default('client').notNull(),
+  role: UserRoles('role').default('CLIENT').notNull(),
   refreshTokenUsed: text('refreshTokenUsed').array(),
   createdAt: timestamp('createdAt', { precision: 6, withTimezone: true })
     .notNull()
@@ -139,30 +163,6 @@ export const ProductItemTable = pgTable('productItems', {
   colourName: text('coulour').notNull(),
   storageName: text('storage'),
   productID: uuid('productID').references((): any => ProductTable.id),
-  createdAt: timestamp('createdAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-})
-
-export const ProductAttributeTable = pgTable('productItems', {
-  productID: uuid('productID')
-    .notNull()
-    .references((): any => ProductTable.id),
-  optionID: uuid('optionID')
-    .notNull()
-    .references((): any => AttributeOptionTable.optionValue),
   createdAt: timestamp('createdAt', {
     mode: 'date',
     precision: 6,
