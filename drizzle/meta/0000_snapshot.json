@@ -1,5 +1,5 @@
 {
-  "id": "926d1a9a-2aaf-4799-b98a-606a144eacd6",
+  "id": "c71db4b9-fb99-4584-9dc0-fe2c972c3d30",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -10,9 +10,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "value": {
           "name": "value",
@@ -22,7 +23,7 @@
         },
         "typeID": {
           "name": "typeID",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         }
@@ -150,13 +151,13 @@
         },
         "invoiceID ": {
           "name": "invoiceID ",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
         "productID": {
           "name": "productID",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -213,9 +214,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "status": {
           "name": "status",
@@ -263,7 +265,7 @@
         },
         "userID": {
           "name": "userID",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -307,9 +309,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "source": {
           "name": "source",
@@ -319,7 +322,7 @@
         },
         "itemID": {
           "name": "itemID",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -614,9 +617,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "content": {
           "name": "content",
@@ -633,13 +637,13 @@
         },
         "productID": {
           "name": "productID",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
         "userID": {
           "name": "userID",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -696,9 +700,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "url": {
           "name": "url",
@@ -714,7 +719,7 @@
         },
         "storeID": {
           "name": "storeID",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
