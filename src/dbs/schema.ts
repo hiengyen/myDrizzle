@@ -10,13 +10,13 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core'
 
-export const UserRoles = pgEnum('userRoles', ['admin', 'client'])
-export const PaymentMethod = pgEnum('paymentMethod', ['cod', 'banking'])
+export const UserRoles = pgEnum('userRoles', ['ADMIN', 'CLIENT'])
+export const PaymentMethod = pgEnum('paymentMethod', ['COD', 'BANKING'])
 export const InvoiceStatus = pgEnum('invoiceStatus', [
-  'new',
-  'shipping',
-  'done',
-  'abort',
+  'NEW',
+  'SHIPPING',
+  'DONE',
+  'ABORT',
 ])
 
 export const CategoryTable = pgTable('categories', {
@@ -72,9 +72,9 @@ export const AttributeTypeTable = pgTable('attributeType', {
     .$onUpdate(() => new Date()),
 })
 export const AttributeOptionTable = pgTable('attributeOption', {
-  optionID: text('id').primaryKey(),
+  providerID: uuid('id').primaryKey().defaultRandom(),
   optionValue: text('value').notNull(),
-  typeID: text('typeID')
+  typeID: uuid('typeID')
     .notNull()
     .references((): any => AttributeTypeTable.typeID),
 })
@@ -86,7 +86,7 @@ export const UsersTable = pgTable('users', {
   password: varchar('password', { length: 255 }).notNull(),
   phoneNum: varchar('phoneNumber', { length: 10 }),
   avatar: text('avatar'),
-  role: UserRoles('role').default('client').notNull(),
+  role: UserRoles('role').default('CLIENT').notNull(),
   refreshTokenUsed: text('refreshTokenUsed').array(),
   createdAt: timestamp('createdAt', { precision: 6, withTimezone: true })
     .notNull()
@@ -107,10 +107,10 @@ export const ProductTable = pgTable('products', {
   weight: real('weight').notNull(),
   warranty: real('waranty').notNull(),
   categoryID: uuid('caregoryID').references(
-    (): any => CategoryTable.categoryID,
+    (): any => CategoryTable.categoryID
   ),
   providerID: uuid('providerID').references(
-    (): any => ProviderTable.providerID,
+    (): any => ProviderTable.providerID
   ),
   createdAt: timestamp('createdAt', {
     mode: 'date',
@@ -157,12 +157,12 @@ export const ProductItemTable = pgTable('productItems', {
 })
 
 export const ProductAttributeTable = pgTable('productItems', {
-  productID: text('productID')
+  productID: uuid('productID')
     .notNull()
     .references((): any => ProductTable.id),
-  optionID: text('optionID')
+  optionID: uuid('optionID')
     .notNull()
-    .references((): any => AttributeOptionTable.optionID),
+    .references((): any => AttributeOptionTable.optionValue),
   createdAt: timestamp('createdAt', {
     mode: 'date',
     precision: 6,
@@ -181,9 +181,9 @@ export const ProductAttributeTable = pgTable('productItems', {
 })
 
 export const ItemImageTable = pgTable('itemImage', {
-  imageID: text('id').primaryKey(),
+  imageID: uuid('id').primaryKey().defaultRandom(),
   src: text('source').notNull(),
-  itemID: text('itemID')
+  itemID: uuid('itemID')
     .notNull()
     .references((): any => ProductItemTable.id),
   createdAt: timestamp('createdAt', {
@@ -204,13 +204,13 @@ export const ItemImageTable = pgTable('itemImage', {
 })
 
 export const ReviewTable = pgTable('review', {
-  reviewID: text('id').primaryKey(),
+  reviewID: uuid('id').primaryKey().defaultRandom(),
   reviewContent: text('content').notNull(),
   rating: smallint('rating').default(5),
-  productID: text('productID')
+  productID: uuid('productID')
     .notNull()
     .references((): any => ProductTable.id),
-  userID: text('userID')
+  userID: uuid('userID')
     .notNull()
     .references((): any => UsersTable.id),
   createdAt: timestamp('createdAt', {
@@ -231,7 +231,7 @@ export const ReviewTable = pgTable('review', {
 })
 
 export const InvoiceTable = pgTable('invoices', {
-  invoiceID: text('id').primaryKey(),
+  invoiceID: uuid('id').primaryKey().defaultRandom(),
   status: InvoiceStatus('status').notNull(),
   payment: PaymentMethod('payment').notNull(),
   city: text('city').notNull(),
@@ -239,7 +239,7 @@ export const InvoiceTable = pgTable('invoices', {
   province: text('province').notNull(),
   phoneNum: text('phoneNumber').notNull(),
   detailAddress: text('detailAddress').notNull(),
-  userID: text('userID')
+  userID: uuid('userID')
     .notNull()
     .references((): any => UsersTable.id),
   createdAt: timestamp('createdAt', {
@@ -264,8 +264,8 @@ export const InvoiceProductTable = pgTable('invoiceProduct', {
   price: real('price').notNull(),
   productName: text('productName').notNull(),
   quantity: smallint('quantity').notNull(),
-  invoiceID: text('invoiceID ').references((): any => InvoiceTable.invoiceID),
-  productID: text('productID').references((): any => ProductTable.id),
+  invoiceID: uuid('invoiceID ').references((): any => InvoiceTable.invoiceID),
+  productID: uuid('productID').references((): any => ProductTable.id),
   createdAt: timestamp('createdAt', {
     mode: 'date',
     precision: 6,
@@ -284,10 +284,10 @@ export const InvoiceProductTable = pgTable('invoiceProduct', {
 })
 
 export const SlideShowTable = pgTable('slideShow', {
-  slideID: text('id').primaryKey(),
+  slideID: uuid('id').primaryKey().defaultRandom(),
   url: text('url').notNull(),
   alt: text('alt').notNull(),
-  storeID: text('storeID')
+  storeID: uuid('storeID')
     .notNull()
     .references((): any => StoreTable.id),
 

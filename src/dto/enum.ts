@@ -1,6 +1,6 @@
 enum UserRoles {
-  Admin = 'admin',
-  Client = 'client',
+  Admin = 'ADMIN',
+  Client = 'CLIENT',
 }
 
 enum AuthToken {

@@ -27,7 +27,6 @@ import { JwtPayload, TokenExpiredError } from 'jsonwebtoken'
  * @param {Response} res
  * @param {NextFunction} next
  */
-
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user: UserInsertDTO = req.body
@@ -155,7 +154,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     const accessToken: string | undefined = await jwtService.generateAuthToken(
       userInPayLoad,
       AuthToken.AccessToken,
-      '5 minutes'
+      '1 days'
     )
 
     const refreshToken: string | undefined = await jwtService.generateAuthToken(
@@ -262,7 +261,7 @@ const logout = async (req: Request, res: Response) => {
 const refreshToken = async (req: Request, res: Response) => {
   try {
     const refreshTokenFromCookie: string = req.cookies?.refreshToken
-    const userIDInHeader: string = String(req.header('user-id'))
+    const userIDInHeader: string = String(req.header('user_id'))
 
     const userRefreshTokenList: RefreshTokenUseds | undefined =
       await userService.getUserRefreshTokenUsed(userIDInHeader)
@@ -345,7 +344,7 @@ const refreshToken = async (req: Request, res: Response) => {
  */
 const updateInfo = async (req: Request, res: Response) => {
   try {
-    const userID: string = String(req.header('user-id'))
+    const userID: string = String(req.header('user_id'))
     const userData: UserUpdateDTO = req.body
 
     // Check if email had been used for other account

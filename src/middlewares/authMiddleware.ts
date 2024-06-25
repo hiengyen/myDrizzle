@@ -1,3 +1,4 @@
+import { UsersTable } from './../dbs/schema'
 import { Request, Response, NextFunction } from 'express'
 import logger from '../utils/logger'
 import { StatusCodes } from 'http-status-codes'
@@ -14,15 +15,16 @@ const isAuthorized = async (
   next: NextFunction
 ) => {
   const accessTokenFromCookie = req.cookies?.accessToken
-  if (!accessTokenFromCookie) {
-    throw new ErrorResponse(
-      'Missing token',
-      StatusCodes.BAD_REQUEST,
-      'Missing token'
-    )
-  }
 
   try {
+    if (!accessTokenFromCookie) {
+      throw new ErrorResponse(
+        'Missing token',
+        StatusCodes.BAD_REQUEST,
+        'Missing token'
+      )
+    }
+
     await jwtService
       .verifyAuthToken(accessTokenFromCookie, AuthToken.AccessToken)
       .catch(() => {
@@ -33,7 +35,7 @@ const isAuthorized = async (
         )
       })
 
-    logger.info('Access token verification successed')
+    logger.info('Access token verification secceed')
     next()
   } catch (error: any) {
     logger.error(
@@ -66,7 +68,7 @@ const accessTokenFromExactUser = async (
       await jwtService.decodeToken(accessTokenFromCookie)
     const userInToken: UserInTokenPayloadDTO =
       accessTokenDecoded as UserInTokenPayloadDTO
-    const userIDInHeader: string | undefined = req.header('user-id')
+    const userIDInHeader: string | undefined = req.header('user_id')
 
     if (!accessTokenFromCookie) {
       throw new ErrorResponse(
@@ -77,20 +79,20 @@ const accessTokenFromExactUser = async (
     }
     if (!userIDInHeader) {
       throw new ErrorResponse(
-        'Request header missing user-id',
+        'Request header missing user_id',
         StatusCodes.BAD_REQUEST,
-        'Request header missing user-id!'
+        'Request header missing user_id!'
       )
     }
     if (userInToken.id !== userIDInHeader) {
       throw new ErrorResponse(
-        'header user-id invalid!',
+        'header user_id invalid!',
         StatusCodes.BAD_REQUEST,
         `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
       )
     }
 
-    logger.info('Access token middleware successed')
+    logger.info('Access token middleware secceed')
     next()
   } catch (error: any) {
     logger.error(
@@ -119,7 +121,7 @@ const refreshTokenFromExactUser = async (
       await jwtService.decodeToken(refreshTokenFromCookie)
     const userInToken: UserInTokenPayloadDTO =
       refreshTokenDecoded as UserInTokenPayloadDTO
-    const userIDInHeader: string | undefined = req.header('user-id')
+    const userIDInHeader: string | undefined = req.header('user_id')
 
     if (!refreshTokenFromCookie) {
       throw new ErrorResponse(
@@ -130,20 +132,20 @@ const refreshTokenFromExactUser = async (
     }
     if (!userIDInHeader) {
       throw new ErrorResponse(
-        'Request header missing user-id',
+        'Request header missing user_id',
         StatusCodes.BAD_REQUEST,
-        'Request header missing user-id!'
+        'Request header missing user_id!'
       )
     }
     if (userInToken.id !== userIDInHeader) {
       throw new ErrorResponse(
-        'header user-id invalid!',
+        'header user_id invalid!',
         StatusCodes.BAD_REQUEST,
         `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
       )
     }
 
-    logger.info('Refresh token middleware successed')
+    logger.info('Refresh token middleware secceed')
     next()
   } catch (error: any) {
     logger.error(
@@ -178,8 +180,6 @@ const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
     const userInToken: UserInTokenPayloadDTO =
       refreshTokenDecoded as UserInTokenPayloadDTO
 
-    logger.info('Refresh token middleware successed')
-
     if (userInToken.role !== UserRoles.Admin) {
       throw new ErrorResponse(
         'Access denied',
@@ -188,10 +188,11 @@ const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
       )
     }
 
+    logger.info('Refresh token middleware secceed')
     next()
   } catch (error: any) {
     if (error instanceof ErrorResponse) {
-      logger.error('Refresh token middleware failure: ' + error.loggerMs)
+      logger.error('Admin middleware failure: ' + error.loggerMs)
       return res.status(error.status).json({
         message: error.message,
       })

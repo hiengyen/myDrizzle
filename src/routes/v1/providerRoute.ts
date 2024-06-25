@@ -1,29 +1,31 @@
 import { authMiddleware } from './../../middlewares/authMiddleware'
 import express, { Request, Response } from 'express'
-import { userController } from '../../controllers/userController'
+import providerController from '../../controllers/providerController'
 
 const router = express.Router()
 // router.use(authMiddleware)
 //
-router.post('/signup', userController.signup)
-router.post('/login', userController.login)
-router.delete('/logout', userController.logout)
-router.get(
-  '/refresh',
+router.get('/', authMiddleware.isAuthorized, providerController.getProviders)
+router.post(
+  '/',
+  authMiddleware.isAuthorized,
   authMiddleware.accessTokenFromExactUser,
-  authMiddleware.refreshTokenFromExactUser,
-  userController.refreshToken
+  authMiddleware.isAdmin,
+  providerController.createProvider
 )
 router.patch(
   '/:id',
   authMiddleware.isAuthorized,
   authMiddleware.accessTokenFromExactUser,
-  userController.updateInfo
+  authMiddleware.isAdmin,
+  providerController.updateProvider
 )
-router.get(
+router.delete(
   '/:id',
   authMiddleware.isAuthorized,
   authMiddleware.accessTokenFromExactUser,
-  userController.getUserWithJWT
+  authMiddleware.isAdmin,
+  providerController.deleteProvider
 )
+
 export default router
