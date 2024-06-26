@@ -14,10 +14,16 @@ router.get(
   authMiddleware.refreshTokenFromExactUser,
   userController.refreshToken
 )
-router.post(
-  '/update-info',
+router.patch(
+  '/:id',
   authMiddleware.isAuthorized,
   authMiddleware.accessTokenFromExactUser,
   userController.updateInfo
+)
+router.get(
+  '/:id',
+  authMiddleware.isAuthorized,
+  authMiddleware.accessTokenFromExactUser,
+  userController.getUserWithJWT
 )
 export default router

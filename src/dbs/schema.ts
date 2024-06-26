@@ -90,10 +90,10 @@ export const ProductTable = pgTable('products', {
   weight: real('weight').notNull(),
   warranty: real('warranty').notNull(),
   categoryID: uuid('caregoryID').references(
-    (): any => CategoryTable.categoryID,
+    (): any => CategoryTable.categoryID
   ),
   providerID: uuid('providerID').references(
-    (): any => ProviderTable.providerID,
+    (): any => ProviderTable.providerID
   ),
 })
 
@@ -107,6 +107,15 @@ export const ProductItemTable = pgTable('productItems', {
   colorName: text('color').notNull(),
   storageName: text('storage'),
   productID: uuid('productID').references((): any => ProductTable.productID),
+})
+
+export const ProductAttributeTable = pgTable('productItems', {
+  productID: uuid('productID')
+    .notNull()
+    .references((): any => ProductTable.id),
+  optionID: uuid('optionID')
+    .notNull()
+    .references((): any => AttributeOptionTable.optionValue),
 })
 
 export const ItemImageTable = pgTable('itemImage', {
@@ -157,6 +166,21 @@ export const InvoiceProductTable = pgTable('invoiceProduct', {
   quantity: smallint('quantity').notNull(),
   invoiceID: uuid('invoiceID ').references((): any => InvoiceTable.invoiceID),
   productID: uuid('productID').references((): any => ProductTable.productID),
+  createdAt: timestamp('createdAt', {
+    mode: 'date',
+    precision: 6,
+    withTimezone: true,
+  })
+    .notNull()
+    .defaultNow(),
+  updateAt: timestamp('updateAt', {
+    mode: 'date',
+    precision: 6,
+    withTimezone: true,
+  })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 })
 
 export const SlideShowTable = pgTable('slideShow', {
