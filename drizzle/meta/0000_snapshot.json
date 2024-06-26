@@ -1,5 +1,6 @@
 {
-  "id": "c71db4b9-fb99-4584-9dc0-fe2c972c3d30",
+
+  "id": "1b7cd23f-8f22-4ff8-b8d4-49be7ba71316",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -63,20 +64,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -100,20 +87,6 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -160,20 +133,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -275,13 +234,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -325,20 +277,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -349,6 +287,55 @@
           "tableTo": "productItems",
           "columnsFrom": [
             "itemID"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.productAttribute": {
+      "name": "productAttribute",
+      "schema": "",
+      "columns": {
+        "productID": {
+          "name": "productID",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "optionID": {
+          "name": "optionID",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "productAttribute_productID_products_id_fk": {
+          "name": "productAttribute_productID_products_id_fk",
+          "tableFrom": "productAttribute",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productID"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "productAttribute_optionID_attributeOption_id_fk": {
+          "name": "productAttribute_optionID_attributeOption_id_fk",
+          "tableFrom": "productAttribute",
+          "tableTo": "attributeOption",
+          "columnsFrom": [
+            "optionID"
           ],
           "columnsTo": [
             "id"
@@ -402,8 +389,8 @@
           "notNull": false,
           "default": 0
         },
-        "coulour": {
-          "name": "coulour",
+        "color": {
+          "name": "color",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -419,20 +406,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -509,8 +482,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "waranty": {
-          "name": "waranty",
+        "warranty": {
+          "name": "warranty",
           "type": "real",
           "primaryKey": false,
           "notNull": true
@@ -526,20 +499,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -590,20 +549,6 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -646,20 +591,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -722,20 +653,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -803,20 +720,6 @@
           "type": "text[]",
           "primaryKey": false,
           "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -871,7 +774,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'client'"
+          "default": "'CLIENT'"
         },
         "refreshTokenUsed": {
           "name": "refreshTokenUsed",
@@ -913,26 +816,26 @@
       "name": "invoiceStatus",
       "schema": "public",
       "values": [
-        "new",
-        "shipping",
-        "done",
-        "abort"
+        "NEW",
+        "SHIPPING",
+        "DONE",
+        "ABORT"
       ]
     },
     "public.paymentMethod": {
       "name": "paymentMethod",
       "schema": "public",
       "values": [
-        "cod",
-        "banking"
+        "COD",
+        "BANKING"
       ]
     },
     "public.userRoles": {
       "name": "userRoles",
       "schema": "public",
       "values": [
-        "admin",
-        "client"
+        "ADMIN",
+        "CLIENT"
       ]
     }
   },

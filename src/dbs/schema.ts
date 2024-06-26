@@ -8,6 +8,7 @@ import {
   timestamp,
   uuid,
   pgEnum,
+  PgColumn,
 } from 'drizzle-orm/pg-core'
 
 export const UserRoles = pgEnum('userRoles', ['ADMIN', 'CLIENT'])
@@ -22,61 +23,43 @@ export const InvoiceStatus = pgEnum('invoiceStatus', [
 export const CategoryTable = pgTable('categories', {
   categoryID: uuid('id').primaryKey().defaultRandom(),
   categoryName: varchar('name', { length: 255 }).notNull(),
-  createdAt: timestamp('createdAt', { precision: 6, withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', { precision: 6, withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 })
 
 export const ProviderTable = pgTable('providers', {
   providerID: uuid('id').primaryKey().defaultRandom(),
   providerName: varchar('name', { length: 255 }).notNull(),
-  createdAt: timestamp('createdAt', { precision: 6, withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', { precision: 6, withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 })
 
 export const StoreTable = pgTable('stores', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 255 }).notNull(),
+  storeID: uuid('id').primaryKey().defaultRandom(),
+  storeName: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   address: text('address'),
-  phoneNum: varchar('phoneNumber', { length: 10 }),
+  phoneNumber: varchar('phoneNumber', { length: 10 }),
   email: varchar('email', { length: 255 }),
   bannerUrls: text('bannerUrls').array(),
-  createdAt: timestamp('createdAt', { precision: 6, withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', { precision: 6, withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 })
 
 export const AttributeTypeTable = pgTable('attributeType', {
   typeID: uuid('id').primaryKey().defaultRandom(),
   typeValue: text('value').notNull(),
-  createdAt: timestamp('createdAt', { precision: 6, withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', { precision: 6, withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 })
+
 export const AttributeOptionTable = pgTable('attributeOption', {
-  providerID: uuid('id').primaryKey().defaultRandom(),
+  optionID: uuid('id').primaryKey().defaultRandom(),
   optionValue: text('value').notNull(),
   typeID: uuid('typeID')
     .notNull()
     .references((): any => AttributeTypeTable.typeID),
+})
+
+export const ProductAttributeTable = pgTable('productAttribute', {
+  productID: uuid('productID')
+    .notNull()
+    .references((): any => ProductTable.productID),
+  optionID: uuid('optionID')
+    .notNull()
+    .references((): any => AttributeOptionTable.optionID),
 })
 
 export const UsersTable = pgTable('users', {
@@ -98,62 +81,32 @@ export const UsersTable = pgTable('users', {
 })
 
 export const ProductTable = pgTable('products', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 255 }).notNull(),
+  productID: uuid('id').primaryKey().defaultRandom(),
+  productName: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   length: real('length').notNull(),
   width: real('width').notNull(),
   height: real('height').notNull(),
   weight: real('weight').notNull(),
-  warranty: real('waranty').notNull(),
+  warranty: real('warranty').notNull(),
   categoryID: uuid('caregoryID').references(
     (): any => CategoryTable.categoryID
   ),
   providerID: uuid('providerID').references(
     (): any => ProviderTable.providerID
   ),
-  createdAt: timestamp('createdAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 })
 
 export const ProductItemTable = pgTable('productItems', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  itemID: uuid('id').primaryKey().defaultRandom(),
   thump: text('thumpnail').notNull(),
   quantity: smallint('quantity').notNull(),
   price: real('price').notNull(),
   productCode: text('productCode').unique(),
   discount: real('discount').default(0),
-  colourName: text('coulour').notNull(),
+  colorName: text('color').notNull(),
   storageName: text('storage'),
-  productID: uuid('productID').references((): any => ProductTable.id),
-  createdAt: timestamp('createdAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
+  productID: uuid('productID').references((): any => ProductTable.productID),
 })
 
 export const ProductAttributeTable = pgTable('productItems', {
@@ -163,21 +116,6 @@ export const ProductAttributeTable = pgTable('productItems', {
   optionID: uuid('optionID')
     .notNull()
     .references((): any => AttributeOptionTable.optionValue),
-  createdAt: timestamp('createdAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 })
 
 export const ItemImageTable = pgTable('itemImage', {
@@ -185,22 +123,7 @@ export const ItemImageTable = pgTable('itemImage', {
   src: text('source').notNull(),
   itemID: uuid('itemID')
     .notNull()
-    .references((): any => ProductItemTable.id),
-  createdAt: timestamp('createdAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
+    .references((): any => ProductItemTable.itemID),
 })
 
 export const ReviewTable = pgTable('review', {
@@ -209,25 +132,10 @@ export const ReviewTable = pgTable('review', {
   rating: smallint('rating').default(5),
   productID: uuid('productID')
     .notNull()
-    .references((): any => ProductTable.id),
+    .references((): any => ProductTable.productID),
   userID: uuid('userID')
     .notNull()
     .references((): any => UsersTable.id),
-  createdAt: timestamp('createdAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 })
 
 export const InvoiceTable = pgTable('invoices', {
@@ -249,14 +157,6 @@ export const InvoiceTable = pgTable('invoices', {
   })
     .notNull()
     .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 })
 
 export const InvoiceProductTable = pgTable('invoiceProduct', {
@@ -265,7 +165,7 @@ export const InvoiceProductTable = pgTable('invoiceProduct', {
   productName: text('productName').notNull(),
   quantity: smallint('quantity').notNull(),
   invoiceID: uuid('invoiceID ').references((): any => InvoiceTable.invoiceID),
-  productID: uuid('productID').references((): any => ProductTable.id),
+  productID: uuid('productID').references((): any => ProductTable.productID),
   createdAt: timestamp('createdAt', {
     mode: 'date',
     precision: 6,
@@ -289,23 +189,7 @@ export const SlideShowTable = pgTable('slideShow', {
   alt: text('alt').notNull(),
   storeID: uuid('storeID')
     .notNull()
-    .references((): any => StoreTable.id),
-
-  createdAt: timestamp('createdAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
+    .references((): any => StoreTable.storeID),
 })
 
 export type InsertUser = typeof UsersTable.$inferInsert

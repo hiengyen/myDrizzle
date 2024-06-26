@@ -18,6 +18,11 @@ import userService from '../services/userService'
 import { AuthToken } from '../dto/enum'
 import { JwtPayload, TokenExpiredError } from 'jsonwebtoken'
 
+import { BadRequestError } from '../errors/BadRequestError'
+
+export const AT_KEY = process.env.AT_SECRET_KEY
+export const RT_KEY = process.env.RT_SECRET_KEY
+
 /**
  * Make user registration
  * If input email had been registed by other account, then response 'user already exist'
@@ -35,11 +40,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       await userService.getUserResponseByEmail(user.email)
 
     if (holderUser) {
-      throw new ErrorResponse(
-        'User already exist',
-        StatusCodes.CONFLICT,
-        'User already exist'
-      )
+      throw new BadRequestError('User already exists')
     }
 
     await userService.insertNewUser(user)
@@ -57,7 +58,6 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: 'Cannot signup',
     })
-  }
 }
 
 /**
