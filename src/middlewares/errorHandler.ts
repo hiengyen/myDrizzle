@@ -1,27 +1,32 @@
-import { Request, Response, NextFunction } from 'express'
+import { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
 import logger from '../utils/logger'
+import { StatusCodes, ReasonPhrases } from 'http-status-codes'
+import { BadRequestError } from '../errors/BadRequestError'
+import { AuthenticationError } from '../errors/AuthenticationError'
+import { NotFoundError } from '../errors/NotFoundError'
 
-interface CustomError extends Error {
-  status?: number
-}
-
-const errorHandler = (
-  err: CustomError,
+export const errorHandler: ErrorRequestHandler = (
+  error: Error,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const status = err.status || 500
-  const message = err.message || 'Internal Server Error'
-  const stack = err.stack
-  res.status(status).json({
-    status: status,
-    message: message,
-  })
+  if (error instanceof AuthenticationError) {
+    return res.status(error.StatusCode).json(error.serialize())
+  }
 
-  // Log the error to the cconsole (or to a logging service)
-  logger.error(`${status} - ${message}`)
-  logger.info(`${stack}`)
+  if (error instanceof BadRequestError) {
+    return res.status(error.StatusCode).json(error.serialize())
+  }
+
+  if (error instanceof NotFoundError) {
+    return res.status(error.StatusCode).json(error.serialize())
+  }
+
+  //Debug error
+  // logger.error(error.stack)
+
+  return res
+    .status(StatusCodes.INTERNAL_SERVER_ERROR)
+    .json({ message: 'Something bad happened, check code' })
 }
-
-export default errorHandler

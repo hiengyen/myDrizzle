@@ -15,6 +15,7 @@ import { User } from '../model/user'
 import { JwtPayload } from 'jsonwebtoken'
 import { UserInPayLoad } from '../model/jwt'
 import { ErrorResponse } from '../utils/error.response'
+import { BadRequestError } from '../errors/BadRequestError'
 
 export const AT_KEY = process.env.AT_SECRET_KEY
 export const RT_KEY = process.env.RT_SECRET_KEY
@@ -30,41 +31,38 @@ export const RT_KEY = process.env.RT_SECRET_KEY
  */
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { name, email, password, role } = req.body
+  // try {
+  const { name, email, password, role } = req.body
 
-    const holderUser: any = await db.query.UsersTable.findFirst({
-      where: eq(UsersTable.email, email),
-    })
+  const holderUser: any = await db.query.UsersTable.findFirst({
+    where: eq(UsersTable.email, email),
+  })
 
-    if (holderUser) {
-      throw new ErrorResponse(
-        'User already exist',
-        StatusCodes.BAD_REQUEST,
-        'User already exist',
-      )
-    }
-    const newUser = await db.insert(UsersTable).values({
-      name,
-      email,
-      password: hashSync(password, 10),
-      role,
-    })
-    logger.info(`User with email ${email} signed up successfull`)
-    return res.status(StatusCodes.CREATED).json({
-      message: 'Sign-up success',
-    })
-  } catch (error: any) {
-    logger.error('Sign up failure: ' + error.loggerMs && error?.message)
-    if (error instanceof ErrorResponse) {
-      return res.status(error.status).json({
-        message: error.message,
-      })
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Cannot signup',
-    })
+  if (holderUser) {
+    throw new BadRequestError('User already exists')
   }
+  const newUser = await db.insert(UsersTable).values({
+    name,
+    email,
+    password: hashSync(password, 10),
+    role,
+  })
+  logger.info(`User with email ${email} signed up successfull`)
+  return res.status(StatusCodes.CREATED).json({
+    message: 'Sign-up success',
+  })
+
+  // } catch (error: any) {
+  //   logger.error('Sign up failure: ' + error.loggerMs && error?.message)
+  //   if (error instanceof ErrorResponse) {
+  //     return res.status(error.status).json({
+  //       message: error.message,
+  //     })
+  //   }
+  //   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+  //     message: 'Cannot signup',
+  //   })
+  // }
 }
 
 /**
