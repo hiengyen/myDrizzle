@@ -26,7 +26,11 @@ export const errorHandler: ErrorRequestHandler = (
   //Debug error
   // logger.error(error.stack)
 
-  return res
-    .status(StatusCodes.INTERNAL_SERVER_ERROR)
-    .json({ message: 'Something bad happened, check code' })
+  const statusCode = StatusCodes.INTERNAL_SERVER_ERROR
+  return res.status(statusCode).json({
+    status: 'Error',
+    code: statusCode,
+    stack: error.stack, // display bug location
+    message: 'Internal Server Error (Something bad happened, check code now!)',
+  })
 }
