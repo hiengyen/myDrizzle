@@ -1,17 +1,10 @@
 interface ProviderDTO {
-  id: string
-  name: string
-  createdAt: Date
-  updateAt: Date
+  providerID: string
+  providerName: string
 }
 
 interface ProviderInsertDTO {
-  name: string
+  providerName: string
 }
 
-interface ProviderUpdateDTO {
-  id: string
-  name: string
-}
-
-export { ProviderDTO, ProviderInsertDTO, ProviderUpdateDTO }
+export { ProviderDTO, ProviderInsertDTO }

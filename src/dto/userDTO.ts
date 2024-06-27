@@ -1,8 +1,8 @@
 import { UserRoles } from './enum'
 
 interface UserResponseDTO {
-  id: string
-  name: string
+  userID: string
+  userName: string
   email: string
   phoneNum: string | null
   avatar: string | null
@@ -12,15 +12,15 @@ interface UserResponseDTO {
 }
 
 interface UserResponseSummaryDTO {
-  id: string
-  name: string
+  userID: string
+  userName: string
   avatar: string | null
   role: string
 }
 
-interface User {
-  id: string
-  name: string
+interface UserDTO {
+  userID: string
+  userName: string
   email: string
   password: string
   phoneNum: string | null
@@ -32,14 +32,15 @@ interface User {
 }
 
 interface UserUpdateDTO {
-  name: string
+  userID: string
+  userName: string
   email: string
   phoneNum: string | null
   avatar: string | null
 }
 
 interface UserInsertDTO {
-  name: string
+  userName: string
   email: string
   password: string
   role: UserRoles
@@ -61,5 +62,5 @@ export {
   UserInsertDTO,
   UserInTokenPayloadDTO,
   UserResponseSummaryDTO,
-  User,
+  UserDTO,
 }

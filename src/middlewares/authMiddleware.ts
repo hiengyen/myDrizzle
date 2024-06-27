@@ -1,12 +1,11 @@
-import { UsersTable } from './../dbs/schema'
 import { Request, Response, NextFunction } from 'express'
 import logger from '../utils/logger'
-import { StatusCodes } from 'http-status-codes'
-import { JwtPayload, TokenExpiredError } from 'jsonwebtoken'
-import { ErrorResponse } from '../utils/error.response'
-import { UserInTokenPayloadDTO } from '../dto/userDTO'
+import { JwtPayload } from 'jsonwebtoken'
 import { AuthToken, UserRoles } from '../dto/enum'
 import jwtService from '../services/jwtService'
+import { BadRequestError } from '../errors/BadRequestError'
+import { ForbiddenError } from '../errors/ForbiddenError'
+import { UserInTokenPayloadDTO } from '../dto/userDTO'
 
 //Get and authorized accessToken receive from FE
 const isAuthorized = async (
@@ -16,45 +15,20 @@ const isAuthorized = async (
 ) => {
   const accessTokenFromCookie = req.cookies?.accessToken
 
-  try {
-    if (!accessTokenFromCookie) {
-      throw new ErrorResponse(
-        'Missing token',
-        StatusCodes.BAD_REQUEST,
-        'Missing token'
-      )
-    }
-
-    await jwtService
-      .verifyAuthToken(accessTokenFromCookie, AuthToken.AccessToken)
-      .catch(() => {
-        throw new ErrorResponse(
-          'Token invalid',
-          StatusCodes.BAD_REQUEST,
-          'Token invalid'
-        )
-      })
-
-    logger.info('Access token verification secceed')
-    next()
-  } catch (error: any) {
-    logger.error(
-      'Validate access token failure: ' + error.loggerMs ?? error?.message
-    )
-    if (error instanceof ErrorResponse) {
-      return res.status(error.status).json({
-        message: error.message,
-      })
-    }
-    if (error instanceof TokenExpiredError) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({
-        message: 'Token had been expired',
-      })
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Error occurred',
-    })
+  if (!accessTokenFromCookie) {
+    logger.error('Validate access token failure: Missing token')
+    throw new BadRequestError('Missing token')
   }
+
+  await jwtService
+    .verifyAuthToken(accessTokenFromCookie, AuthToken.AccessToken)
+    .catch(() => {
+      logger.error('Validate access token failure: Token invalid')
+      throw new BadRequestError('Token invalid')
+    })
+
+  logger.info('Access token verification succeed')
+  next()
 }
 
 const accessTokenFromExactUser = async (
@@ -62,52 +36,32 @@ const accessTokenFromExactUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  try {
-    const accessTokenFromCookie = await req.cookies?.accessToken
-    const accessTokenDecoded: string | JwtPayload | null =
-      await jwtService.decodeToken(accessTokenFromCookie)
-    const userInToken: UserInTokenPayloadDTO =
-      accessTokenDecoded as UserInTokenPayloadDTO
-    const userIDInHeader: string | undefined = req.header('user_id')
+  const accessTokenFromCookie = await req.cookies?.accessToken
+  const accessTokenDecoded: string | JwtPayload | null =
+    await jwtService.decodeToken(accessTokenFromCookie)
+  const userInToken: UserInTokenPayloadDTO =
+    accessTokenDecoded as UserInTokenPayloadDTO
+  logger.error(`Access token middleware failure: ${userInToken}`)
+  const userIDInHeader: string | undefined = req.header('User-id')
 
-    if (!accessTokenFromCookie) {
-      throw new ErrorResponse(
-        'Missing token',
-        StatusCodes.BAD_REQUEST,
-        'Missing token'
-      )
-    }
-    if (!userIDInHeader) {
-      throw new ErrorResponse(
-        'Request header missing user_id',
-        StatusCodes.BAD_REQUEST,
-        'Request header missing user_id!'
-      )
-    }
-    if (userInToken.id !== userIDInHeader) {
-      throw new ErrorResponse(
-        'header user_id invalid!',
-        StatusCodes.BAD_REQUEST,
-        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
-      )
-    }
-
-    logger.info('Access token middleware secceed')
-    next()
-  } catch (error: any) {
-    logger.error(
-      'Access token middleware failure: ' + error.loggerMs ?? error?.message
-    )
-    if (error instanceof ErrorResponse) {
-      return res.status(error.status).json({
-        message: error.message,
-      })
-    }
-
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Token error',
-    })
+  if (!accessTokenFromCookie) {
+    logger.error(`Access token middleware failure: missing token`)
+    throw new BadRequestError('Missing token')
   }
+  if (!userIDInHeader) {
+    logger.error(`Access token middleware failure: header missing User-id`)
+    throw new BadRequestError('Request header missing User-id')
+  }
+
+  if (userInToken.id !== userIDInHeader) {
+    logger.error(
+      `Access token middleware failure: '${userIDInHeader}' differ from userID in token: '${userInToken.id}`
+    )
+    throw new BadRequestError('Header User-id invalid!')
+  }
+
+  logger.info('Access token middleware secceed')
+  next()
 }
 
 const refreshTokenFromExactUser = async (
@@ -115,94 +69,53 @@ const refreshTokenFromExactUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  try {
-    const refreshTokenFromCookie = req.cookies?.refreshToken
-    const refreshTokenDecoded: string | JwtPayload | null =
-      await jwtService.decodeToken(refreshTokenFromCookie)
-    const userInToken: UserInTokenPayloadDTO =
-      refreshTokenDecoded as UserInTokenPayloadDTO
-    const userIDInHeader: string | undefined = req.header('user_id')
+  const refreshTokenFromCookie = req.cookies?.refreshToken
+  const refreshTokenDecoded: string | JwtPayload | null =
+    await jwtService.decodeToken(refreshTokenFromCookie)
 
-    if (!refreshTokenFromCookie) {
-      throw new ErrorResponse(
-        'Missing token',
-        StatusCodes.BAD_REQUEST,
-        'Missing token'
-      )
-    }
-    if (!userIDInHeader) {
-      throw new ErrorResponse(
-        'Request header missing user_id',
-        StatusCodes.BAD_REQUEST,
-        'Request header missing user_id!'
-      )
-    }
-    if (userInToken.id !== userIDInHeader) {
-      throw new ErrorResponse(
-        'header user_id invalid!',
-        StatusCodes.BAD_REQUEST,
-        `header userID: '${userIDInHeader}' differ from userID in token: '${userInToken.id}'`
-      )
-    }
+  const userInToken: UserInTokenPayloadDTO =
+    refreshTokenDecoded as UserInTokenPayloadDTO
+  const userIDInHeader: string | undefined = req.header('User-id')
 
-    logger.info('Refresh token middleware secceed')
-    next()
-  } catch (error: any) {
-    logger.error(
-      'Refresh token middleware failure: ' + error.loggerMs ?? error?.message
-    )
-    if (error instanceof ErrorResponse) {
-      return res.status(error.status).json({
-        message: error.message,
-      })
-    }
-
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Token error!',
-    })
+  if (!refreshTokenFromCookie) {
+    logger.error('Refresh token middleware failure: Missing token')
+    throw new BadRequestError('Missing token')
   }
+  if (!userIDInHeader) {
+    logger.error('Refresh token middleware failure: header missing User-id')
+    throw new BadRequestError('Request header missing User-id')
+  }
+  if (userInToken.id !== userIDInHeader) {
+    logger.error(
+      `Refresh token middleware failure: ${userIDInHeader} differ from userID in token: ${userInToken.id}`
+    )
+    throw new BadRequestError('header User-id invalid!')
+  }
+
+  logger.info('Refresh token middleware secceed')
+  next()
 }
 
 const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const refreshTokenFromCookie = req.cookies?.refreshToken
+  const refreshTokenFromCookie = req.cookies?.refreshToken
 
-    if (!refreshTokenFromCookie) {
-      throw new ErrorResponse(
-        'Unauthorized request!',
-        StatusCodes.UNAUTHORIZED,
-        'Refresh token not found'
-      )
-    }
-
-    const refreshTokenDecoded: string | JwtPayload | null =
-      await jwtService.decodeToken(refreshTokenFromCookie)
-    const userInToken: UserInTokenPayloadDTO =
-      refreshTokenDecoded as UserInTokenPayloadDTO
-
-    if (userInToken.role !== UserRoles.Admin) {
-      throw new ErrorResponse(
-        'Access denied',
-        StatusCodes.FORBIDDEN,
-        'Access denied'
-      )
-    }
-
-    logger.info('Refresh token middleware secceed')
-    next()
-  } catch (error: any) {
-    if (error instanceof ErrorResponse) {
-      logger.error('Admin middleware failure: ' + error.loggerMs)
-      return res.status(error.status).json({
-        message: error.message,
-      })
-    }
-
-    logger.error('Cannot run cheking refresh token')
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Token error!',
-    })
+  if (!refreshTokenFromCookie) {
+    logger.error('Admin middleware failure: Unauthorized request!')
+    throw new BadRequestError('Unauthorized request!')
   }
+
+  const refreshTokenDecoded: string | JwtPayload | null =
+    await jwtService.decodeToken(refreshTokenFromCookie)
+  const userInToken: UserInTokenPayloadDTO =
+    refreshTokenDecoded as UserInTokenPayloadDTO
+
+  if (userInToken.role !== UserRoles.Admin) {
+    logger.error('Admin middleware failure: access denied')
+    throw new ForbiddenError('Access denied')
+  }
+
+  logger.info('Refresh token middleware secceed')
+  next()
 }
 
 export const authMiddleware = {

@@ -1,17 +1,10 @@
 interface CategoryDTO {
-  id: string
-  name: string
-  createdAt: Date
-  updateAt: Date
+  categoryID: string
+  categoryName: string
 }
 
 interface CategoryInsertDTO {
-  name: string
+  categoryName: string
 }
 
-interface CategoryUpdateDTO {
-  id: string
-  name: string
-}
-
-export { CategoryDTO, CategoryInsertDTO, CategoryUpdateDTO }
+export { CategoryDTO, CategoryInsertDTO }
