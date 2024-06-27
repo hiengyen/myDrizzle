@@ -1,23 +1,22 @@
 {
-
-  "id": "1b7cd23f-8f22-4ff8-b8d4-49be7ba71316",
+  "id": "0fec6375-3ec4-41af-93b8-f05213c74ba3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.attributeOption": {
-      "name": "attributeOption",
+    "public.AttributeOption": {
+      "name": "AttributeOption",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "optionID": {
+          "name": "optionID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "value": {
-          "name": "value",
+        "optionValue": {
+          "name": "optionValue",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -31,15 +30,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "attributeOption_typeID_attributeType_id_fk": {
-          "name": "attributeOption_typeID_attributeType_id_fk",
-          "tableFrom": "attributeOption",
-          "tableTo": "attributeType",
+        "AttributeOption_typeID_AttributeType_typeID_fk": {
+          "name": "AttributeOption_typeID_AttributeType_typeID_fk",
+          "tableFrom": "AttributeOption",
+          "tableTo": "AttributeType",
           "columnsFrom": [
             "typeID"
           ],
           "columnsTo": [
-            "id"
+            "typeID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -48,19 +47,19 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.attributeType": {
-      "name": "attributeType",
+    "public.AttributeType": {
+      "name": "AttributeType",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "typeID": {
+          "name": "typeID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "value": {
-          "name": "value",
+        "typeValue": {
+          "name": "typeValue",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -71,19 +70,19 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.categories": {
-      "name": "categories",
+    "public.Category": {
+      "name": "Category",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "categoryID": {
+          "name": "categoryID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
+        "categoryName": {
+          "name": "categoryName",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -94,8 +93,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.invoiceProduct": {
-      "name": "invoiceProduct",
+    "public.InvoiceProduct": {
+      "name": "InvoiceProduct",
       "schema": "",
       "columns": {
         "discount": {
@@ -133,32 +132,46 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (6) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updateAt": {
+          "name": "updateAt",
+          "type": "timestamp (6) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "invoiceProduct_invoiceID _invoices_id_fk": {
-          "name": "invoiceProduct_invoiceID _invoices_id_fk",
-          "tableFrom": "invoiceProduct",
-          "tableTo": "invoices",
+        "InvoiceProduct_invoiceID _Invoice_invoiceID_fk": {
+          "name": "InvoiceProduct_invoiceID _Invoice_invoiceID_fk",
+          "tableFrom": "InvoiceProduct",
+          "tableTo": "Invoice",
           "columnsFrom": [
             "invoiceID "
           ],
           "columnsTo": [
-            "id"
+            "invoiceID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "invoiceProduct_productID_products_id_fk": {
-          "name": "invoiceProduct_productID_products_id_fk",
-          "tableFrom": "invoiceProduct",
-          "tableTo": "products",
+        "InvoiceProduct_productID_Product_productID_fk": {
+          "name": "InvoiceProduct_productID_Product_productID_fk",
+          "tableFrom": "InvoiceProduct",
+          "tableTo": "Product",
           "columnsFrom": [
             "productID"
           ],
           "columnsTo": [
-            "id"
+            "productID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -167,12 +180,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.invoices": {
-      "name": "invoices",
+    "public.Invoice": {
+      "name": "Invoice",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "invoiceID": {
+          "name": "invoiceID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
@@ -238,15 +251,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "invoices_userID_users_id_fk": {
-          "name": "invoices_userID_users_id_fk",
-          "tableFrom": "invoices",
-          "tableTo": "users",
+        "Invoice_userID_User_userID_fk": {
+          "name": "Invoice_userID_User_userID_fk",
+          "tableFrom": "Invoice",
+          "tableTo": "User",
           "columnsFrom": [
             "userID"
           ],
           "columnsTo": [
-            "id"
+            "userID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -255,12 +268,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.itemImage": {
-      "name": "itemImage",
+    "public.ItemImage": {
+      "name": "ItemImage",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "imageID": {
+          "name": "imageID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
@@ -281,15 +294,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "itemImage_itemID_productItems_id_fk": {
-          "name": "itemImage_itemID_productItems_id_fk",
-          "tableFrom": "itemImage",
-          "tableTo": "productItems",
+        "ItemImage_itemID_ProductItem_itemID_fk": {
+          "name": "ItemImage_itemID_ProductItem_itemID_fk",
+          "tableFrom": "ItemImage",
+          "tableTo": "ProductItem",
           "columnsFrom": [
             "itemID"
           ],
           "columnsTo": [
-            "id"
+            "itemID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -298,8 +311,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.productAttribute": {
-      "name": "productAttribute",
+    "public.ProductAttribute": {
+      "name": "ProductAttribute",
       "schema": "",
       "columns": {
         "productID": {
@@ -317,28 +330,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "productAttribute_productID_products_id_fk": {
-          "name": "productAttribute_productID_products_id_fk",
-          "tableFrom": "productAttribute",
-          "tableTo": "products",
+        "ProductAttribute_productID_Product_productID_fk": {
+          "name": "ProductAttribute_productID_Product_productID_fk",
+          "tableFrom": "ProductAttribute",
+          "tableTo": "Product",
           "columnsFrom": [
             "productID"
           ],
           "columnsTo": [
-            "id"
+            "productID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "productAttribute_optionID_attributeOption_id_fk": {
-          "name": "productAttribute_optionID_attributeOption_id_fk",
-          "tableFrom": "productAttribute",
-          "tableTo": "attributeOption",
+        "ProductAttribute_optionID_AttributeOption_optionID_fk": {
+          "name": "ProductAttribute_optionID_AttributeOption_optionID_fk",
+          "tableFrom": "ProductAttribute",
+          "tableTo": "AttributeOption",
           "columnsFrom": [
             "optionID"
           ],
           "columnsTo": [
-            "id"
+            "optionID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -347,19 +360,19 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.productItems": {
-      "name": "productItems",
+    "public.ProductItem": {
+      "name": "ProductItem",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "itemID": {
+          "name": "itemID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "thumpnail": {
-          "name": "thumpnail",
+        "thump": {
+          "name": "thump",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -410,15 +423,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "productItems_productID_products_id_fk": {
-          "name": "productItems_productID_products_id_fk",
-          "tableFrom": "productItems",
-          "tableTo": "products",
+        "ProductItem_productID_Product_productID_fk": {
+          "name": "ProductItem_productID_Product_productID_fk",
+          "tableFrom": "ProductItem",
+          "tableTo": "Product",
           "columnsFrom": [
             "productID"
           ],
           "columnsTo": [
-            "id"
+            "productID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -426,8 +439,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "productItems_productCode_unique": {
-          "name": "productItems_productCode_unique",
+        "ProductItem_productCode_unique": {
+          "name": "ProductItem_productCode_unique",
           "nullsNotDistinct": false,
           "columns": [
             "productCode"
@@ -435,19 +448,19 @@
         }
       }
     },
-    "public.products": {
-      "name": "products",
+    "public.Product": {
+      "name": "Product",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "productID": {
+          "name": "productID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
+        "productName": {
+          "name": "productName",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -503,28 +516,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "products_caregoryID_categories_id_fk": {
-          "name": "products_caregoryID_categories_id_fk",
-          "tableFrom": "products",
-          "tableTo": "categories",
+        "Product_caregoryID_Category_categoryID_fk": {
+          "name": "Product_caregoryID_Category_categoryID_fk",
+          "tableFrom": "Product",
+          "tableTo": "Category",
           "columnsFrom": [
             "caregoryID"
           ],
           "columnsTo": [
-            "id"
+            "categoryID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "products_providerID_providers_id_fk": {
-          "name": "products_providerID_providers_id_fk",
-          "tableFrom": "products",
-          "tableTo": "providers",
+        "Product_providerID_Provider_providerID_fk": {
+          "name": "Product_providerID_Provider_providerID_fk",
+          "tableFrom": "Product",
+          "tableTo": "Provider",
           "columnsFrom": [
             "providerID"
           ],
           "columnsTo": [
-            "id"
+            "providerID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -533,19 +546,19 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.providers": {
-      "name": "providers",
+    "public.Provider": {
+      "name": "Provider",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "providerID": {
+          "name": "providerID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
+        "providerName": {
+          "name": "providerName",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -556,19 +569,19 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.review": {
-      "name": "review",
+    "public.Review": {
+      "name": "Review",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "reviewID": {
+          "name": "reviewID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "content": {
-          "name": "content",
+        "reviewContent": {
+          "name": "reviewContent",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -595,28 +608,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "review_productID_products_id_fk": {
-          "name": "review_productID_products_id_fk",
-          "tableFrom": "review",
-          "tableTo": "products",
+        "Review_productID_Product_productID_fk": {
+          "name": "Review_productID_Product_productID_fk",
+          "tableFrom": "Review",
+          "tableTo": "Product",
           "columnsFrom": [
             "productID"
           ],
           "columnsTo": [
-            "id"
+            "productID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "review_userID_users_id_fk": {
-          "name": "review_userID_users_id_fk",
-          "tableFrom": "review",
-          "tableTo": "users",
+        "Review_userID_User_userID_fk": {
+          "name": "Review_userID_User_userID_fk",
+          "tableFrom": "Review",
+          "tableTo": "User",
           "columnsFrom": [
             "userID"
           ],
           "columnsTo": [
-            "id"
+            "userID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -625,12 +638,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.slideShow": {
-      "name": "slideShow",
+    "public.SlideShow": {
+      "name": "SlideShow",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "slideID": {
+          "name": "slideID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
@@ -657,15 +670,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "slideShow_storeID_stores_id_fk": {
-          "name": "slideShow_storeID_stores_id_fk",
-          "tableFrom": "slideShow",
-          "tableTo": "stores",
+        "SlideShow_storeID_Store_storeID_fk": {
+          "name": "SlideShow_storeID_Store_storeID_fk",
+          "tableFrom": "SlideShow",
+          "tableTo": "Store",
           "columnsFrom": [
             "storeID"
           ],
           "columnsTo": [
-            "id"
+            "storeID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -674,19 +687,19 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.stores": {
-      "name": "stores",
+    "public.Store": {
+      "name": "Store",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "storeID": {
+          "name": "storeID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
+        "storeName": {
+          "name": "storeName",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -727,19 +740,19 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.users": {
-      "name": "users",
+    "public.User": {
+      "name": "User",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "userID": {
+          "name": "userID",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
+        "userName": {
+          "name": "userName",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -767,6 +780,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "isBanned": {
+          "name": "isBanned",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "role": {
           "name": "role",
@@ -801,8 +821,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "users_email_unique": {
-          "name": "users_email_unique",
+        "User_email_unique": {
+          "name": "User_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"

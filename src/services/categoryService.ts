@@ -1,17 +1,13 @@
 import { db } from '../dbs/db'
 import { and, eq } from 'drizzle-orm'
-import {
-  CategoryInsertDTO,
-  CategoryDTO,
-  CategoryUpdateDTO,
-} from '../dto/categoryDTO'
+import { CategoryInsertDTO, CategoryDTO } from '../dto/categoryDTO'
 import { CategoryTable } from '../dbs/schema'
 
 const getCategoryByID = async (
   categoryID: string
 ): Promise<CategoryDTO | undefined> => {
   const searchingCategory: CategoryDTO | undefined =
-    await db.query.UsersTable.findFirst({
+    await db.query.CategoryTable.findFirst({
       where: eq(CategoryTable.categoryID, categoryID),
     })
   return searchingCategory
@@ -21,12 +17,7 @@ const getCategoryByName = async (
   categoryName: string
 ): Promise<CategoryDTO[]> => {
   const categoryInDB: CategoryDTO[] = await db
-    .select({
-      id: CategoryTable.categoryID,
-      name: CategoryTable.categoryName,
-      createdAt: CategoryTable.createdAt,
-      updateAt: CategoryTable.updateAt,
-    })
+    .select()
     .from(CategoryTable)
     .where(eq(CategoryTable.categoryName, categoryName))
 
@@ -35,21 +26,14 @@ const getCategoryByName = async (
 
 const insertCategory = async (category: CategoryInsertDTO) => {
   await db.insert(CategoryTable).values({
-    categoryName: category.name,
+    categoryName: category.categoryName,
   })
 }
 
-const getCategorys = async (): Promise<CategoryDTO[] | undefined> => {
-  const categorys: CategoryDTO[] = await db
-    .select({
-      id: CategoryTable.categoryID,
-      name: CategoryTable.categoryName,
-      createdAt: CategoryTable.createdAt,
-      updateAt: CategoryTable.updateAt,
-    })
-    .from(CategoryTable)
+const getCategories = async (): Promise<CategoryDTO[] | undefined> => {
+  const categories: CategoryDTO[] = await db.select().from(CategoryTable)
 
-  return categorys
+  return categories
 }
 
 const deleteCategory = async (
@@ -67,20 +51,15 @@ const deleteCategory = async (
 }
 
 const updateCategory = async (
-  category: CategoryUpdateDTO
+  category: CategoryDTO
 ): Promise<CategoryDTO | undefined> => {
   const updatedCategory: CategoryDTO[] = await db
     .update(CategoryTable)
     .set({
-      categoryName: category.name,
+      categoryName: category.categoryName,
     })
-    .where(and(eq(CategoryTable.categoryID, category.id)))
-    .returning({
-      id: CategoryTable.categoryID,
-      name: CategoryTable.categoryName,
-      createdAt: CategoryTable.createdAt,
-      updateAt: CategoryTable.updateAt,
-    })
+    .where(and(eq(CategoryTable.categoryID, category.categoryID)))
+    .returning()
 
   if (!updatedCategory || updatedCategory.length === 0) {
     return undefined
@@ -94,5 +73,5 @@ export default {
   insertCategory,
   updateCategory,
   deleteCategory,
-  getCategorys,
+  getCategories,
 }

@@ -1,143 +1,88 @@
 import { Request, Response } from 'express'
-import {
-  ProviderInsertDTO,
-  ProviderUpdateDTO,
-  ProviderDTO,
-} from '../dto/providerDTO'
+import { ProviderInsertDTO, ProviderDTO } from '../dto/providerDTO'
 import providerService from '../services/providerService'
-import { ErrorResponse } from '../utils/error.response'
 import { StatusCodes } from 'http-status-codes'
 import logger from '../utils/logger'
+import { ConflictError } from '../errors/ConflictError'
+import { BadRequestError } from '../errors/BadRequestError'
 
 const createProvider = async (req: Request, res: Response) => {
-  try {
-    const newProvider: ProviderInsertDTO = req.body
-
-    const providerInDB: ProviderDTO[] = await providerService.getProviderByName(
-      newProvider.name
-    )
-
-    if (providerInDB.length !== 0) {
-      throw new ErrorResponse(
-        'Provider already exist',
-        StatusCodes.CONFLICT,
-        'Provider already exist'
-      )
-    }
-
-    await providerService.insertProvider(newProvider)
-
-    logger.info(`Provider: ${newProvider.name} has been added successful`)
-    return res.status(StatusCodes.CREATED).json({
-      message: 'Create provider success',
-    })
-  } catch (error: any) {
-    logger.error('Create provider failure: ' + error.loggerMs && error?.message)
-    if (error instanceof ErrorResponse) {
-      return res.status(error.status).json({
-        message: error.message,
-      })
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Create provider failure',
-    })
+  const newProvider: ProviderInsertDTO = {
+    providerName: req.body.name,
   }
+
+  const providerInDB: ProviderDTO[] = await providerService.getProviderByName(
+    newProvider.providerName
+  )
+
+  if (providerInDB.length !== 0) {
+    logger.error('Create provider failure: provider already exist')
+    throw new ConflictError('Provider already exist')
+  }
+
+  await providerService.insertProvider(newProvider)
+
+  logger.info(`Provider: ${newProvider.providerName} has been added successful`)
+  res.status(StatusCodes.CREATED).json({
+    message: 'Create provider success',
+  })
 }
 
 const updateProvider = async (req: Request, res: Response) => {
-  try {
-    const providerReq: ProviderUpdateDTO = {
-      id: req.params.id,
-      name: req.body.name,
-    }
-
-    const providerInDB: ProviderDTO[] = await providerService.getProviderByName(
-      providerReq.name
-    )
-
-    if (providerInDB.length !== 0) {
-      throw new ErrorResponse(
-        'Provider already existed',
-        StatusCodes.CONFLICT,
-        'Provider already existed'
-      )
-    }
-
-    const updatedProvider: ProviderDTO | undefined =
-      await providerService.updateProvider(providerReq)
-
-    if (!updatedProvider) {
-      throw new ErrorResponse(
-        'Provider not found',
-        StatusCodes.BAD_REQUEST,
-        'Provider not found'
-      )
-    }
-
-    logger.info(`Update provider with id: ${providerReq.id} successfull`)
-    return res.status(StatusCodes.OK).json({
-      message: 'Update provider success',
-    })
-  } catch (error: any) {
-    logger.error('Update provider failure: ' + error.loggerMs && error?.message)
-    if (error instanceof ErrorResponse) {
-      return res.status(error.status).json({
-        message: error.message,
-      })
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Update provider failure',
-    })
+  const providerReq: ProviderDTO = {
+    providerID: req.params.id,
+    providerName: req.body.name,
   }
+
+  const providerInDB: ProviderDTO[] = await providerService.getProviderByName(
+    providerReq.providerName
+  )
+
+  if (providerInDB.length !== 0) {
+    logger.error('Update provider failure: provider already exist')
+    throw new ConflictError('Provider already exist')
+  }
+
+  const updatedProvider: ProviderDTO | undefined =
+    await providerService.updateProvider(providerReq)
+
+  if (!updatedProvider) {
+    logger.error('Update provider failure: provider not found')
+    throw new BadRequestError('Provider not found')
+  }
+
+  logger.info(`Update provider with id: ${providerReq.providerID} successfull`)
+  res.status(StatusCodes.OK).json({
+    message: 'Update provider success',
+  })
 }
 
 const deleteProvider = async (req: Request, res: Response) => {
-  try {
-    const providerIDInReq: string = req.params.id
+  const providerIDInReq: string = req.params.id
 
-    const deletedProviderID: string | undefined =
-      await providerService.deleteProvider(providerIDInReq)
+  const deletedProviderID: string | undefined =
+    await providerService.deleteProvider(providerIDInReq)
 
-    if (!deletedProviderID) {
-      throw new ErrorResponse(
-        'Provider not found',
-        StatusCodes.CONFLICT,
-        'Provider not found'
-      )
-    }
-
-    logger.info(`Delete provider with id: ${deletedProviderID} successfull`)
-    return res.status(StatusCodes.OK).json({
-      message: 'Delete provider successfull',
-    })
-  } catch (error: any) {
-    logger.error('Delete provider failure: ' + error.loggerMs && error?.message)
-    if (error instanceof ErrorResponse) {
-      return res.status(error.status).json({
-        message: error.message,
-      })
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Delete failure',
-    })
+  if (!deletedProviderID) {
+    logger.error('Delete provider failure: provider not found')
+    throw new ConflictError('Provider not found')
   }
+
+  logger.info(`Delete provider with id: ${deletedProviderID} successfull`)
+  res.status(StatusCodes.OK).json({
+    message: 'Delete provider successfull',
+  })
 }
 
 const getProviders = async (req: Request, res: Response) => {
-  try {
-    const providers: ProviderDTO[] | undefined =
-      await providerService.getProviders()
+  const providers: ProviderDTO[] | undefined =
+    await providerService.getProviders()
 
-    logger.info(`Get providers successfull`)
-    return res.status(StatusCodes.OK).json({
-      message: 'Get providers successfull',
-      info: providers,
-    })
-  } catch (error: any) {
-    logger.error('Get providers failure: ' + error?.message)
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Get providers failure',
-    })
-  }
+  logger.info(`Get providers successfull`)
+  return res.status(StatusCodes.OK).json({
+    message: 'Get providers successfull',
+    info: providers,
+  })
 }
+
 export default { createProvider, updateProvider, deleteProvider, getProviders }

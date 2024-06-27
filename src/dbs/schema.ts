@@ -8,7 +8,7 @@ import {
   timestamp,
   uuid,
   pgEnum,
-  PgColumn,
+  boolean,
 } from 'drizzle-orm/pg-core'
 
 export const UserRoles = pgEnum('userRoles', ['ADMIN', 'CLIENT'])
@@ -20,19 +20,19 @@ export const InvoiceStatus = pgEnum('invoiceStatus', [
   'ABORT',
 ])
 
-export const CategoryTable = pgTable('categories', {
-  categoryID: uuid('id').primaryKey().defaultRandom(),
-  categoryName: varchar('name', { length: 255 }).notNull(),
+export const CategoryTable = pgTable('Category', {
+  categoryID: uuid('categoryID').primaryKey().defaultRandom(),
+  categoryName: varchar('categoryName', { length: 255 }).notNull(),
 })
 
-export const ProviderTable = pgTable('providers', {
-  providerID: uuid('id').primaryKey().defaultRandom(),
-  providerName: varchar('name', { length: 255 }).notNull(),
+export const ProviderTable = pgTable('Provider', {
+  providerID: uuid('providerID').primaryKey().defaultRandom(),
+  providerName: varchar('providerName', { length: 255 }).notNull(),
 })
 
-export const StoreTable = pgTable('stores', {
-  storeID: uuid('id').primaryKey().defaultRandom(),
-  storeName: varchar('name', { length: 255 }).notNull(),
+export const StoreTable = pgTable('Store', {
+  storeID: uuid('storeID').primaryKey().defaultRandom(),
+  storeName: varchar('storeName', { length: 255 }).notNull(),
   description: text('description'),
   address: text('address'),
   phoneNumber: varchar('phoneNumber', { length: 10 }),
@@ -40,20 +40,20 @@ export const StoreTable = pgTable('stores', {
   bannerUrls: text('bannerUrls').array(),
 })
 
-export const AttributeTypeTable = pgTable('attributeType', {
-  typeID: uuid('id').primaryKey().defaultRandom(),
-  typeValue: text('value').notNull(),
+export const AttributeTypeTable = pgTable('AttributeType', {
+  typeID: uuid('typeID').primaryKey().defaultRandom(),
+  typeValue: text('typeValue').notNull(),
 })
 
-export const AttributeOptionTable = pgTable('attributeOption', {
-  optionID: uuid('id').primaryKey().defaultRandom(),
-  optionValue: text('value').notNull(),
+export const AttributeOptionTable = pgTable('AttributeOption', {
+  optionID: uuid('optionID').primaryKey().defaultRandom(),
+  optionValue: text('optionValue').notNull(),
   typeID: uuid('typeID')
     .notNull()
     .references((): any => AttributeTypeTable.typeID),
 })
 
-export const ProductAttributeTable = pgTable('productAttribute', {
+export const ProductAttributeTable = pgTable('ProductAttribute', {
   productID: uuid('productID')
     .notNull()
     .references((): any => ProductTable.productID),
@@ -62,13 +62,14 @@ export const ProductAttributeTable = pgTable('productAttribute', {
     .references((): any => AttributeOptionTable.optionID),
 })
 
-export const UsersTable = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 255 }).notNull(),
+export const UserTable = pgTable('User', {
+  userID: uuid('userID').primaryKey().defaultRandom(),
+  userName: varchar('userName', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
   phoneNum: varchar('phoneNumber', { length: 10 }),
   avatar: text('avatar'),
+  isBanned: boolean('isBanned').default(false).notNull(),
   role: UserRoles('role').default('CLIENT').notNull(),
   refreshTokenUsed: text('refreshTokenUsed').array(),
   createdAt: timestamp('createdAt', { precision: 6, withTimezone: true })
@@ -80,9 +81,9 @@ export const UsersTable = pgTable('users', {
     .$onUpdate(() => new Date()),
 })
 
-export const ProductTable = pgTable('products', {
-  productID: uuid('id').primaryKey().defaultRandom(),
-  productName: varchar('name', { length: 255 }).notNull(),
+export const ProductTable = pgTable('Product', {
+  productID: uuid('productID').primaryKey().defaultRandom(),
+  productName: varchar('productName', { length: 255 }).notNull(),
   description: text('description'),
   length: real('length').notNull(),
   width: real('width').notNull(),
@@ -97,9 +98,9 @@ export const ProductTable = pgTable('products', {
   ),
 })
 
-export const ProductItemTable = pgTable('productItems', {
-  itemID: uuid('id').primaryKey().defaultRandom(),
-  thump: text('thumpnail').notNull(),
+export const ProductItemTable = pgTable('ProductItem', {
+  itemID: uuid('itemID').primaryKey().defaultRandom(),
+  thump: text('thump').notNull(),
   quantity: smallint('quantity').notNull(),
   price: real('price').notNull(),
   productCode: text('productCode').unique(),
@@ -109,37 +110,28 @@ export const ProductItemTable = pgTable('productItems', {
   productID: uuid('productID').references((): any => ProductTable.productID),
 })
 
-export const ProductAttributeTable = pgTable('productItems', {
-  productID: uuid('productID')
-    .notNull()
-    .references((): any => ProductTable.id),
-  optionID: uuid('optionID')
-    .notNull()
-    .references((): any => AttributeOptionTable.optionValue),
-})
-
-export const ItemImageTable = pgTable('itemImage', {
-  imageID: uuid('id').primaryKey().defaultRandom(),
-  src: text('source').notNull(),
+export const ItemImageTable = pgTable('ItemImage', {
+  imageID: uuid('imageID').primaryKey().defaultRandom(),
+  source: text('source').notNull(),
   itemID: uuid('itemID')
     .notNull()
     .references((): any => ProductItemTable.itemID),
 })
 
-export const ReviewTable = pgTable('review', {
-  reviewID: uuid('id').primaryKey().defaultRandom(),
-  reviewContent: text('content').notNull(),
+export const ReviewTable = pgTable('Review', {
+  reviewID: uuid('reviewID').primaryKey().defaultRandom(),
+  reviewContent: text('reviewContent').notNull(),
   rating: smallint('rating').default(5),
   productID: uuid('productID')
     .notNull()
     .references((): any => ProductTable.productID),
   userID: uuid('userID')
     .notNull()
-    .references((): any => UsersTable.id),
+    .references((): any => UserTable.userID),
 })
 
-export const InvoiceTable = pgTable('invoices', {
-  invoiceID: uuid('id').primaryKey().defaultRandom(),
+export const InvoiceTable = pgTable('Invoice', {
+  invoiceID: uuid('invoiceID').primaryKey().defaultRandom(),
   status: InvoiceStatus('status').notNull(),
   payment: PaymentMethod('payment').notNull(),
   city: text('city').notNull(),
@@ -149,7 +141,7 @@ export const InvoiceTable = pgTable('invoices', {
   detailAddress: text('detailAddress').notNull(),
   userID: uuid('userID')
     .notNull()
-    .references((): any => UsersTable.id),
+    .references((): any => UserTable.userID),
   createdAt: timestamp('createdAt', {
     mode: 'date',
     precision: 6,
@@ -159,7 +151,7 @@ export const InvoiceTable = pgTable('invoices', {
     .defaultNow(),
 })
 
-export const InvoiceProductTable = pgTable('invoiceProduct', {
+export const InvoiceProductTable = pgTable('InvoiceProduct', {
   discount: real('discount'),
   price: real('price').notNull(),
   productName: text('productName').notNull(),
@@ -183,8 +175,8 @@ export const InvoiceProductTable = pgTable('invoiceProduct', {
     .$onUpdate(() => new Date()),
 })
 
-export const SlideShowTable = pgTable('slideShow', {
-  slideID: uuid('id').primaryKey().defaultRandom(),
+export const SlideShowTable = pgTable('SlideShow', {
+  slideID: uuid('slideID').primaryKey().defaultRandom(),
   url: text('url').notNull(),
   alt: text('alt').notNull(),
   storeID: uuid('storeID')
@@ -192,5 +184,5 @@ export const SlideShowTable = pgTable('slideShow', {
     .references((): any => StoreTable.storeID),
 })
 
-export type InsertUser = typeof UsersTable.$inferInsert
-export type SelectUser = typeof UsersTable.$inferSelect
+export type InsertUser = typeof UserTable.$inferInsert
+export type SelectUser = typeof UserTable.$inferSelect

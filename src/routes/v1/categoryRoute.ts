@@ -5,7 +5,7 @@ import categoryController from '../../controllers/categoryController'
 const router = express.Router()
 // router.use(authMiddleware)
 //
-router.get('/', authMiddleware.isAuthorized, categoryController.getCategorys)
+router.get('/', authMiddleware.isAuthorized, categoryController.getCategories)
 router.post(
   '/',
   authMiddleware.isAuthorized,

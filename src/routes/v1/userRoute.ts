@@ -1,6 +1,6 @@
 import { authMiddleware } from './../../middlewares/authMiddleware'
 import express, { Request, Response } from 'express'
-import { userController } from '../../controllers/userController'
+import userController from '../../controllers/userController'
 
 const router = express.Router()
 // router.use(authMiddleware)
@@ -15,13 +15,13 @@ router.get(
   userController.refreshToken
 )
 router.patch(
-  '/:id',
+  '/',
   authMiddleware.isAuthorized,
   authMiddleware.accessTokenFromExactUser,
   userController.updateInfo
 )
 router.get(
-  '/:id',
+  '/',
   authMiddleware.isAuthorized,
   authMiddleware.accessTokenFromExactUser,
   userController.getUserWithJWT

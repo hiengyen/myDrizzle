@@ -1,17 +1,13 @@
 import { db } from '../dbs/db'
 import { and, eq } from 'drizzle-orm'
-import {
-  ProviderInsertDTO,
-  ProviderDTO,
-  ProviderUpdateDTO,
-} from '../dto/providerDTO'
+import { ProviderInsertDTO, ProviderDTO } from '../dto/providerDTO'
 import { ProviderTable } from '../dbs/schema'
 
 const getProviderByID = async (
   providerID: string
 ): Promise<ProviderDTO | undefined> => {
   const searchingProvider: ProviderDTO | undefined =
-    await db.query.UsersTable.findFirst({
+    await db.query.ProviderTable.findFirst({
       where: eq(ProviderTable.providerID, providerID),
     })
   return searchingProvider
@@ -21,12 +17,7 @@ const getProviderByName = async (
   providerName: string
 ): Promise<ProviderDTO[]> => {
   const providerInDB: ProviderDTO[] = await db
-    .select({
-      id: ProviderTable.providerID,
-      name: ProviderTable.providerName,
-      createdAt: ProviderTable.createdAt,
-      updateAt: ProviderTable.updateAt,
-    })
+    .select()
     .from(ProviderTable)
     .where(eq(ProviderTable.providerName, providerName))
 
@@ -35,19 +26,12 @@ const getProviderByName = async (
 
 const insertProvider = async (provider: ProviderInsertDTO) => {
   await db.insert(ProviderTable).values({
-    providerName: provider.name,
+    providerName: provider.providerName,
   })
 }
 
 const getProviders = async (): Promise<ProviderDTO[] | undefined> => {
-  const providers: ProviderDTO[] = await db
-    .select({
-      id: ProviderTable.providerID,
-      name: ProviderTable.providerName,
-      createdAt: ProviderTable.createdAt,
-      updateAt: ProviderTable.updateAt,
-    })
-    .from(ProviderTable)
+  const providers: ProviderDTO[] = await db.select().from(ProviderTable)
 
   return providers
 }
@@ -67,20 +51,15 @@ const deleteProvider = async (
 }
 
 const updateProvider = async (
-  provider: ProviderUpdateDTO
+  provider: ProviderDTO
 ): Promise<ProviderDTO | undefined> => {
   const updatedProvider: ProviderDTO[] = await db
     .update(ProviderTable)
     .set({
-      providerName: provider.name,
+      providerName: provider.providerName,
     })
-    .where(and(eq(ProviderTable.providerID, provider.id)))
-    .returning({
-      id: ProviderTable.providerID,
-      name: ProviderTable.providerName,
-      createdAt: ProviderTable.createdAt,
-      updateAt: ProviderTable.updateAt,
-    })
+    .where(and(eq(ProviderTable.providerID, provider.providerID)))
+    .returning()
 
   if (!updatedProvider || updatedProvider.length === 0) {
     return undefined

@@ -1,9 +1,9 @@
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env' })
 import JWT from 'jsonwebtoken'
-import { UserInTokenPayloadDTO } from '../dto/userDTO'
 import { AuthToken } from '../dto/enum'
 import logger from '../utils/logger'
+import { UserInTokenPayloadDTO } from '../dto/userDTO'
 const AT_KEY: string | undefined = process.env.AT_SECRET_KEY
 const RT_KEY: string | undefined = process.env.RT_SECRET_KEY
 
