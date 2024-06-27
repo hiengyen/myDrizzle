@@ -277,7 +277,11 @@ const updateInfo = async (req: Request, res: Response) => {
     logger.error('Update user info api failure: header missing User-id')
     throw new BadRequestError('Request header missing User-id')
   }
-  const userData: UserUpdateDTO = { userIDInHeader, ...req.body }
+  const userData: UserUpdateDTO = {
+    userID: userIDInHeader,
+    userName: req.body.name,
+    ...req.body,
+  }
 
   // Check if email had been used for other user
   const checkEmailInUsed = await userService.checkEmailInUsed(
