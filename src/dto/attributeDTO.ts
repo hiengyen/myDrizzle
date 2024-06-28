@@ -3,9 +3,30 @@ interface AttributeTypeDTO {
   typeValue: string
 }
 
+interface AttributeTypeInsertDTO {
+  typeValue: string
+}
+
 interface AttributeOptionDTO {
   optionID: string
   optionValue: string
 }
 
-export { AttributeTypeDTO, AttributeOptionDTO }
+interface AttributeOptionInsertDTO {
+  optionValue: string
+  typeID: string
+}
+
+interface AttributeDTO {
+  typeID: string
+  typeValue: string
+  options: AttributeOptionDTO[]
+}
+
+export {
+  AttributeTypeDTO,
+  AttributeTypeInsertDTO,
+  AttributeOptionDTO,
+  AttributeOptionInsertDTO,
+  AttributeDTO,
+}

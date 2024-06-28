@@ -41,7 +41,6 @@ const accessTokenFromExactUser = async (
     await jwtService.decodeToken(accessTokenFromCookie)
   const userInToken: UserInTokenPayloadDTO =
     accessTokenDecoded as UserInTokenPayloadDTO
-  logger.error(`Access token middleware failure: ${userInToken}`)
   const userIDInHeader: string | undefined = req.header('User-id')
 
   if (!accessTokenFromCookie) {
@@ -60,7 +59,7 @@ const accessTokenFromExactUser = async (
     throw new BadRequestError('Header User-id invalid!')
   }
 
-  logger.info('Access token middleware secceed')
+  logger.info('Access token middleware succeed')
   next()
 }
 
@@ -92,7 +91,7 @@ const refreshTokenFromExactUser = async (
     throw new BadRequestError('header User-id invalid!')
   }
 
-  logger.info('Refresh token middleware secceed')
+  logger.info('Refresh token middleware succeed')
   next()
 }
 
@@ -114,7 +113,7 @@ const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
     throw new ForbiddenError('Access denied')
   }
 
-  logger.info('Refresh token middleware secceed')
+  logger.info('Refresh token middleware succeed')
   next()
 }
 

@@ -2,7 +2,7 @@ import { BadRequestError } from './../errors/BadRequestError'
 import { db } from '../dbs/db'
 import { eq, sql } from 'drizzle-orm'
 import { compareSync, hashSync } from 'bcrypt'
-import { StatusCodes } from 'http-status-codes'
+import { StatusCodes, UNAUTHORIZED } from 'http-status-codes'
 import {
   RefreshTokenUseds,
   UserResponseDTO,
@@ -13,6 +13,7 @@ import {
 } from '../dto/userDTO'
 import logger from '../utils/logger'
 import { UserTable, SelectUser } from '../dbs/schema'
+import { AuthenticationError } from '../errors/AuthenticationError'
 
 const getUserResponseByEmail = async (
   email: string
@@ -54,7 +55,7 @@ const getValidUserResponseSummary = async (
   // Check whether password is valid
   const match = compareSync(password, findByEmail.password)
   if (!match) {
-    throw new BadRequestError('Wrong password')
+    throw new AuthenticationError('Wrong password')
   }
 
   const user: UserResponseSummaryDTO = {

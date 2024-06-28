@@ -43,7 +43,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   const holderUser: UserResponseDTO | undefined =
     await userService.getUserResponseByEmail(user.email)
 
-  if (holderUser) throw new BadRequestError('User already exists')
+  if (holderUser) throw new ConflictError('User already exists')
 
   await userService.insertNewUser(user)
   logger.info(`User with email ${user.email} signed up successfull`)
