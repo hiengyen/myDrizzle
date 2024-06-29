@@ -12,7 +12,7 @@ const createProvider = async (req: Request, res: Response) => {
   }
 
   const providerInDB: ProviderDTO[] = await providerService.getProviderByName(
-    newProvider.providerName
+    newProvider.providerName,
   )
 
   if (providerInDB.length !== 0) {
@@ -35,7 +35,7 @@ const updateProvider = async (req: Request, res: Response) => {
   }
 
   const providerInDB: ProviderDTO[] = await providerService.getProviderByName(
-    providerReq.providerName
+    providerReq.providerName,
   )
 
   if (providerInDB.length !== 0) {

@@ -4,7 +4,7 @@ import { ProviderInsertDTO, ProviderDTO } from '../dto/providerDTO'
 import { ProviderTable } from '../dbs/schema'
 
 const getProviderByID = async (
-  providerID: string
+  providerID: string,
 ): Promise<ProviderDTO | undefined> => {
   const searchingProvider: ProviderDTO | undefined =
     await db.query.ProviderTable.findFirst({
@@ -14,7 +14,7 @@ const getProviderByID = async (
 }
 
 const getProviderByName = async (
-  providerName: string
+  providerName: string,
 ): Promise<ProviderDTO[]> => {
   const providerInDB: ProviderDTO[] = await db
     .select()
@@ -37,7 +37,7 @@ const getProviders = async (): Promise<ProviderDTO[] | undefined> => {
 }
 
 const deleteProvider = async (
-  providerID: string
+  providerID: string,
 ): Promise<string | undefined> => {
   const deletedProviderID: { id: string }[] = await db
     .delete(ProviderTable)
@@ -51,7 +51,7 @@ const deleteProvider = async (
 }
 
 const updateProvider = async (
-  provider: ProviderDTO
+  provider: ProviderDTO,
 ): Promise<ProviderDTO | undefined> => {
   const updatedProvider: ProviderDTO[] = await db
     .update(ProviderTable)
