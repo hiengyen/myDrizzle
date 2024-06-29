@@ -19,16 +19,16 @@ const createProductHandler = async (req: Request, res: Response) => {
     ...req.body,
   }
 
-  try {
-    const newProduct = await productService.createProduct(productPayload)
+  const newProduct: unknown = await productService.createProduct(productPayload)
 
-    res.status(StatusCodes.CREATED).json({
-      message: 'Create Product success',
-      info: newProduct,
-    })
-  } catch (error) {
-    logger.error(error)
+  if (!newProduct) {
+    throw new BadRequestError('Can not create')
   }
+
+  res.status(StatusCodes.CREATED).json({
+    message: 'Create Product success',
+    info: newProduct,
+  })
 }
 
 const updateProductHandler = async (req: Request, res: Response) => {
@@ -36,7 +36,13 @@ const updateProductHandler = async (req: Request, res: Response) => {
     productID: req.params.id,
     ...req.body,
   }
-  await productService.updateProduct(productPayload)
+
+  const updatedProduct: unknown =
+    await productService.updateProduct(productPayload)
+
+  if (!updatedProduct) {
+    throw new BadRequestError('Can not update')
+  }
 
   logger.info(`Update provider with id: ${req.params.id} successfull`)
   res.status(StatusCodes.OK).json({

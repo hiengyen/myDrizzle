@@ -1,5 +1,5 @@
 import { db } from '../dbs/db'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { ProductTable } from '../dbs/schema'
 import { ProductDTO, ProductInsertDTO } from '../dto/productDTO'
 import { BadRequestError } from '../errors/BadRequestError'
@@ -21,7 +21,7 @@ const createProduct = async (productPayload: ProductInsertDTO) => {
 }
 
 const updateProduct = async (productPayload: ProductDTO) => {
-  await db
+  const updatedProduct = await db
     .update(ProductTable)
     .set({
       productName: productPayload.productName,

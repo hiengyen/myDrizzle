@@ -15,7 +15,7 @@ import logger from '../utils/logger'
 import { UserTable, SelectUser } from '../dbs/schema'
 
 const getUserResponseByEmail = async (
-  email: string
+  email: string,
 ): Promise<UserResponseDTO | undefined> => {
   const holderUser: UserResponseDTO | undefined =
     await db.query.UserTable.findFirst({
@@ -43,7 +43,7 @@ const getUserByEmail = async (email: string): Promise<UserDTO | undefined> => {
 
 const getValidUserResponseSummary = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<UserResponseSummaryDTO> => {
   const findByEmail: UserDTO | undefined = await getUserByEmail(email)
 
@@ -67,7 +67,7 @@ const getValidUserResponseSummary = async (
 }
 
 const getUserResponseByID = async (
-  userID: string
+  userID: string,
 ): Promise<UserResponseDTO | undefined> => {
   const holderUser: UserResponseDTO | undefined =
     await db.query.UserTable.findFirst({
@@ -87,7 +87,7 @@ const getUserResponseByID = async (
 }
 
 const getUserResponseSummaryByID = async (
-  userID: string
+  userID: string,
 ): Promise<UserResponseSummaryDTO | undefined> => {
   const holderUser: UserResponseSummaryDTO | undefined =
     await db.query.UserTable.findFirst({
@@ -107,7 +107,7 @@ const insertNewUser = async (user: UserInsertDTO) => {
 }
 
 const updateUserInfo = async (
-  user: UserUpdateDTO
+  user: UserUpdateDTO,
 ): Promise<UserResponseDTO[]> => {
   const resUser: UserResponseDTO[] = await db
     .update(UserTable)
@@ -135,21 +135,21 @@ const updateUserInfo = async (
  */
 const checkEmailInUsed = async (
   email: string,
-  userID: string
+  userID: string,
 ): Promise<boolean> => {
   const holderUsers: UserResponseDTO[] = await db.query.UserTable.findMany({
     where: eq(UserTable.email, email),
   })
 
   const result: UserResponseDTO | undefined = holderUsers.find(
-    user => user.email === email && user.userID !== userID
+    user => user.email === email && user.userID !== userID,
   )
   logger.info(`result: ${result}`)
   return result !== undefined
 }
 
 const getUserRefreshTokenUsed = async (
-  userID: string
+  userID: string,
 ): Promise<RefreshTokenUseds | undefined> => {
   const refreshTokenUseds: RefreshTokenUseds | undefined =
     await db.query.UserTable.findFirst({
@@ -162,9 +162,8 @@ const getUserRefreshTokenUsed = async (
 }
 
 const deleteRefreshToken = async (refreshToken: string, userID: string) => {
-  const userData: RefreshTokenUseds | undefined = await getUserRefreshTokenUsed(
-    userID
-  )
+  const userData: RefreshTokenUseds | undefined =
+    await getUserRefreshTokenUsed(userID)
 
   if (!userData) {
     throw new BadRequestError('User none exist')
@@ -173,7 +172,7 @@ const deleteRefreshToken = async (refreshToken: string, userID: string) => {
   //Delete current refresh token from DB if it exist
   if (userData.refreshTokenUsed) {
     const newRefreshTokenBucket: string[] = userData.refreshTokenUsed.filter(
-      token => token !== refreshToken
+      token => token !== refreshToken,
     )
     await db
       .update(UserTable)
