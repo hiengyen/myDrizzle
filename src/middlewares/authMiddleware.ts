@@ -11,7 +11,7 @@ import { UserInTokenPayloadDTO } from '../dto/userDTO'
 const isAuthorized = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const accessTokenFromCookie = req.cookies?.accessToken
 
@@ -34,7 +34,7 @@ const isAuthorized = async (
 const accessTokenFromExactUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const accessTokenFromCookie = await req.cookies?.accessToken
   const accessTokenDecoded: string | JwtPayload | null =
@@ -54,7 +54,7 @@ const accessTokenFromExactUser = async (
 
   if (userInToken.id !== userIDInHeader) {
     logger.error(
-      `Access token middleware failure: '${userIDInHeader}' differ from userID in token: '${userInToken.id}`
+      `Access token middleware failure: '${userIDInHeader}' differ from userID in token: '${userInToken.id}`,
     )
     throw new BadRequestError('Header User-id invalid!')
   }
@@ -66,7 +66,7 @@ const accessTokenFromExactUser = async (
 const refreshTokenFromExactUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const refreshTokenFromCookie = req.cookies?.refreshToken
   const refreshTokenDecoded: string | JwtPayload | null =
@@ -86,7 +86,7 @@ const refreshTokenFromExactUser = async (
   }
   if (userInToken.id !== userIDInHeader) {
     logger.error(
-      `Refresh token middleware failure: ${userIDInHeader} differ from userID in token: ${userInToken.id}`
+      `Refresh token middleware failure: ${userIDInHeader} differ from userID in token: ${userInToken.id}`,
     )
     throw new BadRequestError('header User-id invalid!')
   }

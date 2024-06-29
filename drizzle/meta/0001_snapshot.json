@@ -1,6 +1,6 @@
 {
-  "id": "c6ab5f65-c067-4cff-9942-421cfc822b50",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "bee98bd8-e00e-416b-8d56-ec0f7f035d85",
+  "prevId": "0fec6375-3ec4-41af-93b8-f05213c74ba3",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -133,19 +133,23 @@
           "primaryKey": false,
           "notNull": false
         },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
+        "productCode": {
+          "name": "productCode",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": false
         },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
+        "color": {
+          "name": "color",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": false
+        },
+        "storage": {
+          "name": "storage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
