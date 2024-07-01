@@ -27,6 +27,18 @@ const createReview = async (
   return newReview
 }
 
+const checkReview = async (userID: string): Promise<boolean> => {
+  const check: any = await db.query.ReviewTable.findFirst({
+    where: eq(ReviewTable.userID, userID),
+  })
+
+  if (check) {
+    return true
+  }
+
+  return false
+}
+
 const updateReview = async (
   reviewPayload: ReviewUpdateDTO,
 ): Promise<ReviewUpdateDTO> => {
@@ -56,4 +68,5 @@ export const reviewService = {
   createReview,
   deleteReview,
   updateReview,
+  checkReview,
 }

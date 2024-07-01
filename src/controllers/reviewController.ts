@@ -7,6 +7,7 @@ import { BadRequestError } from '../errors/BadRequestError'
 import { ConflictError } from '../errors/ConflictError'
 import { reviewService } from '../services/reviewService'
 import { ReviewDTO, ReviewInsertDTO, ReviewUpdateDTO } from '../dto/reviewDTO'
+import { db } from '../dbs/db'
 
 const getOneReviewHandler = async (
   req: Request,
@@ -40,9 +41,7 @@ const getManyReviewHandler = async (
 
   res.status(StatusCodes.OK).json({
     message: 'Get Review success',
-    metadata: {
-      reviews: getManyReview,
-    },
+    reviews: getManyReview,
   })
 }
 
@@ -51,6 +50,11 @@ const createReviewHandler = async (req: Request, res: Response) => {
     ...req.body,
     userID: req.header('User-id'),
     productID: req.params.id,
+  }
+
+  const check = await reviewService.checkReview(reviewPayload.userID)
+  if (check) {
+    throw new ConflictError('Can not add review')
   }
 
   const newReview: unknown = await reviewService.createReview(reviewPayload)
