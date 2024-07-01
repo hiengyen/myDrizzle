@@ -15,11 +15,7 @@ router.post(
   ],
   productController.createProductHandler
 )
-router.get(
-  '/:id',
-  [authMiddleware.accessTokenFromExactUser],
-  productController.getProduct
-)
+router.get('/:id', authMiddleware.isAuthorized, productController.getProduct)
 router.patch(
   '/:id',
   [

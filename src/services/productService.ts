@@ -72,6 +72,7 @@ const createProduct = async (product: ProductInsertDTO) => {
     productItemIDs
   )
   if (itemImages.length !== 0) {
+    logger.info(`insert into image table values : ${itemImages.length}}`)
     await db.insert(ItemImageTable).values(itemImages)
   }
 
@@ -100,6 +101,7 @@ const updateProduct = async (product: ProductUpdateDTO, productID: string) => {
     logger.error('Create product failure: items not found')
     throw new BadRequestError('Items not found')
   }
+  logger.info('into batch')
   await db.batch([
     db
       .update(ProductTable)
@@ -116,6 +118,7 @@ const updateProduct = async (product: ProductUpdateDTO, productID: string) => {
       .where(eq(ProductItemTable.productID, productID)),
   ])
 
+  logger.info('updateItem')
   //update ProductItemTable
   const productItemIDs: { itemID: string }[] = await db
     .insert(ProductItemTable)
@@ -145,7 +148,7 @@ const updateProduct = async (product: ProductUpdateDTO, productID: string) => {
   // })
 }
 
-const deleteProduct = async (productID: string) => {
+const deleteProduct = async (productID: string): Promise<string[]> => {
   const deletedItemIDBucket: string[] = (
     await db
       .select({ itemID: ProductItemTable.itemID })
@@ -153,18 +156,21 @@ const deleteProduct = async (productID: string) => {
       .where(eq(ProductItemTable.productID, productID))
   ).map(e => e.itemID)
 
-  await db.batch([
+  const rawData = await db.batch([
+    db
+      .delete(ItemImageTable)
+      .where(inArray(ItemImageTable.itemID, deletedItemIDBucket))
+      .returning({ source: ItemImageTable.source }),
     db
       .delete(ProductAttributeTable)
       .where(eq(ProductAttributeTable.productID, productID)),
     db
-      .delete(ItemImageTable)
-      .where(inArray(ItemImageTable.itemID, deletedItemIDBucket)),
-    db
       .delete(ProductItemTable)
-      .where(eq(ProductItemTable.productID, productID)),
+      .where(eq(ProductItemTable.productID, productID))
+      .returning({ thump: ProductItemTable.thump }),
     db.delete(ProductTable).where(eq(ProductTable.productID, productID)),
   ])
+  return rawData[0].map(e => e.source)
 }
 
 const checkProductExisting = async (productID: string) => {
@@ -370,7 +376,7 @@ const getProductFullJoinDTO = async (
       .from(ProductAttributeTable)
       .where(eq(ProductAttributeTable.productID, productID)),
   ])
-
+  logger.info(`image left join item row counter: ${rawData[1].length}`)
   console.log('get product data success')
   //Make product
   const product: ProductFullJoinDTO = {
@@ -395,6 +401,7 @@ const getProductFullJoinDTO = async (
           storageName: curr.storageName,
           images: [],
         }
+        curr.source && newItem.images.push(curr.source)
         prev.push(newItem)
       } else {
         curr.source && itemHolder.images.push(curr.source)
@@ -403,6 +410,9 @@ const getProductFullJoinDTO = async (
     }, []),
   }
 
+  logger.info(
+    `after assemble images counter: ${product.items[0].images.length}`
+  )
   return product
 }
 

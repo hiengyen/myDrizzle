@@ -14,7 +14,6 @@ import { BadRequestError } from '../errors/BadRequestError'
 
 const createProductHandler = async (req: Request, res: Response) => {
   const productPayload: ProductInsertDTO = req.body
-
   if (!productPayload) {
     logger.error('Create product failure: request missing some attrs in body')
     throw new BadRequestError('Request missing some attrs in body')
@@ -40,7 +39,7 @@ const updateProductHandler = async (req: Request, res: Response) => {
     logger.error('Update product failure: product not found')
     throw new BadRequestError('Product not found')
   }
-
+  logger.info('into update')
   await productService.updateProduct(productPayload, productID)
 
   res.status(StatusCodes.OK).json({
@@ -57,10 +56,11 @@ const deleteProductHandler = async (req: Request, res: Response) => {
   }
 
   logger.info('Delete product: valid product')
-  await productService.deleteProduct(productID)
+  const deletedIDs: string[] = await productService.deleteProduct(productID)
 
   res.status(StatusCodes.OK).json({
     message: 'Delete product succeed',
+    info: deletedIDs,
   })
 }
 
