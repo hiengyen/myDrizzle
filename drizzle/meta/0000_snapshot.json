@@ -1,5 +1,5 @@
 {
-  "id": "c6ab5f65-c067-4cff-9942-421cfc822b50",
+  "id": "af093641-7879-4cd7-bcbb-73dd850d9b26",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -133,19 +133,23 @@
           "primaryKey": false,
           "notNull": false
         },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp (6) with time zone",
+        "productCode": {
+          "name": "productCode",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": false
         },
-        "updateAt": {
-          "name": "updateAt",
-          "type": "timestamp (6) with time zone",
+        "color": {
+          "name": "color",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": false
+        },
+        "storage": {
+          "name": "storage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -393,7 +397,7 @@
           "name": "productCode",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "discount": {
           "name": "discount",
@@ -438,15 +442,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "ProductItem_productCode_unique": {
-          "name": "ProductItem_productCode_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "productCode"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.Product": {
       "name": "Product",
@@ -501,8 +497,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "caregoryID": {
-          "name": "caregoryID",
+        "categoryID": {
+          "name": "categoryID",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -516,12 +512,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Product_caregoryID_Category_categoryID_fk": {
-          "name": "Product_caregoryID_Category_categoryID_fk",
+        "Product_categoryID_Category_categoryID_fk": {
+          "name": "Product_categoryID_Category_categoryID_fk",
           "tableFrom": "Product",
           "tableTo": "Category",
           "columnsFrom": [
-            "caregoryID"
+            "categoryID"
           ],
           "columnsTo": [
             "categoryID"

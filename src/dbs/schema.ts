@@ -1,6 +1,5 @@
 import {
   smallint,
-  bigint,
   real,
   varchar,
   pgTable,
@@ -90,7 +89,7 @@ export const ProductTable = pgTable('Product', {
   height: real('height').notNull(),
   weight: real('weight').notNull(),
   warranty: real('warranty').notNull(),
-  categoryID: uuid('caregoryID').references(
+  categoryID: uuid('categoryID').references(
     (): any => CategoryTable.categoryID
   ),
   providerID: uuid('providerID').references(
@@ -103,7 +102,7 @@ export const ProductItemTable = pgTable('ProductItem', {
   thump: text('thump').notNull(),
   quantity: smallint('quantity').notNull(),
   price: real('price').notNull(),
-  productCode: text('productCode').unique(),
+  productCode: text('productCode').notNull(),
   discount: real('discount').default(0),
   colorName: text('color').notNull(),
   storageName: text('storage'),
@@ -158,21 +157,9 @@ export const InvoiceProductTable = pgTable('InvoiceProduct', {
   quantity: smallint('quantity').notNull(),
   invoiceID: uuid('invoiceID ').references((): any => InvoiceTable.invoiceID),
   productID: uuid('productID').references((): any => ProductTable.productID),
-  createdAt: timestamp('createdAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow(),
-  updateAt: timestamp('updateAt', {
-    mode: 'date',
-    precision: 6,
-    withTimezone: true,
-  })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
+  productCode: text('productCode'),
+  colorName: text('color'),
+  storageName: text('storage'),
 })
 
 export const SlideShowTable = pgTable('SlideShow', {

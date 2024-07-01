@@ -39,8 +39,9 @@ CREATE TABLE IF NOT EXISTS "InvoiceProduct" (
 	"quantity" smallint NOT NULL,
 	"invoiceID " uuid,
 	"productID" uuid,
-	"createdAt" timestamp (6) with time zone DEFAULT now() NOT NULL,
-	"updateAt" timestamp (6) with time zone DEFAULT now() NOT NULL
+	"productCode" text,
+	"color" text,
+	"storage" text
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "Invoice" (
@@ -72,12 +73,11 @@ CREATE TABLE IF NOT EXISTS "ProductItem" (
 	"thump" text NOT NULL,
 	"quantity" smallint NOT NULL,
 	"price" real NOT NULL,
-	"productCode" text,
+	"productCode" text NOT NULL,
 	"discount" real DEFAULT 0,
 	"color" text NOT NULL,
 	"storage" text,
-	"productID" uuid,
-	CONSTRAINT "ProductItem_productCode_unique" UNIQUE("productCode")
+	"productID" uuid
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "Product" (
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS "Product" (
 	"height" real NOT NULL,
 	"weight" real NOT NULL,
 	"warranty" real NOT NULL,
-	"caregoryID" uuid,
+	"categoryID" uuid,
 	"providerID" uuid
 );
 --> statement-breakpoint
@@ -187,7 +187,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "Product" ADD CONSTRAINT "Product_caregoryID_Category_categoryID_fk" FOREIGN KEY ("caregoryID") REFERENCES "public"."Category"("categoryID") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryID_Category_categoryID_fk" FOREIGN KEY ("categoryID") REFERENCES "public"."Category"("categoryID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

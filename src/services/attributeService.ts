@@ -1,5 +1,5 @@
 import { db } from '../dbs/db'
-import { and, eq, ne, sql } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import {
   AttributeOptionTable,
   AttributeTypeTable,

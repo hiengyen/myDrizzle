@@ -1,12 +1,11 @@
 import { authMiddleware } from './../../middlewares/authMiddleware'
 import express from 'express'
-import { productController } from '../../controllers/productController'
+import productController from '../../controllers/productController'
 
 const router = express.Router()
 // router.use(authMiddleware)
 //
-router.get('/', authMiddleware.isAuthorized)
-
+router.get('/', authMiddleware.isAuthorized, productController.getProducts)
 router.post(
   '/',
   [
@@ -14,7 +13,12 @@ router.post(
     authMiddleware.accessTokenFromExactUser,
     authMiddleware.isAdmin,
   ],
-  productController.createProductHandler,
+  productController.createProductHandler
+)
+router.get(
+  '/:id',
+  [authMiddleware.accessTokenFromExactUser],
+  productController.getProduct
 )
 router.patch(
   '/:id',
@@ -23,7 +27,7 @@ router.patch(
     authMiddleware.accessTokenFromExactUser,
     authMiddleware.isAdmin,
   ],
-  productController.updateProductHandler,
+  productController.updateProductHandler
 )
 router.delete(
   '/:id',
@@ -32,7 +36,7 @@ router.delete(
     authMiddleware.accessTokenFromExactUser,
     authMiddleware.isAdmin,
   ],
-  productController.deleteProductHandler,
+  productController.deleteProductHandler
 )
 
 export default router

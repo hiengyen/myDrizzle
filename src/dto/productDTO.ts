@@ -1,14 +1,14 @@
 interface ProductDTO {
   productID: string
   productName: string
-  description: string
+  description: string | null
   length: number
   width: number
   height: number
   weight: number
   warranty: number
-  categoryID: string
-  providerID: string
+  categoryName: string | null
+  providerName: string | null
 }
 
 interface ProductInsertDTO {
@@ -21,6 +21,79 @@ interface ProductInsertDTO {
   warranty: number
   categoryID: string
   providerID: string
+  options: string[]
+  productItems: ProductItemInsertDTO[]
 }
 
-export { ProductDTO, ProductInsertDTO }
+interface ProductItemInsertDTO {
+  thump: string
+  quantity: number
+  price: number
+  productCode: string
+  discount: number
+  colorName: string
+  storageName: string
+  images: string[]
+}
+
+interface ItemImageDTO {
+  itemID: string
+  source: string
+}
+
+interface ProductOptionDTO {
+  productID: string
+  optionID: string
+}
+
+interface ProductUpdateDTO {
+  productID: string
+  productName: string
+  description: string
+  length: number
+  width: number
+  height: number
+  weight: number
+  warranty: number
+  categoryID: string
+  providerID: string
+  options: string[]
+  productItems: ProductItemDTO[]
+}
+interface ProductItemDTO {
+  itemID: string
+  thump: string
+  quantity: number
+  price: number
+  productCode: string
+  discount: number | null
+  colorName: string
+  storageName: string | null
+  images: string[]
+}
+
+interface ProductFullJoinDTO {
+  productID: string
+  productName: string
+  description: string | null
+  length: number
+  width: number
+  height: number
+  weight: number
+  warranty: number
+  categoryID: string | null
+  providerID: string | null
+  options: (string | null)[]
+  items: ProductItemDTO[]
+}
+
+export {
+  ProductDTO,
+  ProductInsertDTO,
+  ProductItemInsertDTO,
+  ProductItemDTO,
+  ItemImageDTO,
+  ProductOptionDTO,
+  ProductUpdateDTO,
+  ProductFullJoinDTO,
+}
