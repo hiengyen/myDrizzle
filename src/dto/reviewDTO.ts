@@ -13,4 +13,9 @@ interface ReviewInsertDTO {
   productID: string
 }
 
-export { ReviewDTO, ReviewInsertDTO }
+interface ReviewUpdateDTO {
+  reviewID: string
+  reviewContent: string
+  rating: number
+}
+export { ReviewDTO, ReviewInsertDTO, ReviewUpdateDTO }

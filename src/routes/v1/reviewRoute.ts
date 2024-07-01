@@ -36,6 +36,7 @@ router.delete(
   '/:id',
   authMiddleware.isAuthorized,
   authMiddleware.accessTokenFromExactUser,
+  authMiddleware.isAdmin,
   reviewController.deleteReviewHandler,
 )
 

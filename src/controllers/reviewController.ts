@@ -6,7 +6,7 @@ import logger from '../utils/logger'
 import { BadRequestError } from '../errors/BadRequestError'
 import { ConflictError } from '../errors/ConflictError'
 import { reviewService } from '../services/reviewService'
-import { ReviewDTO, ReviewInsertDTO } from '../dto/reviewDTO'
+import { ReviewDTO, ReviewInsertDTO, ReviewUpdateDTO } from '../dto/reviewDTO'
 
 const getOneReviewHandler = async (
   req: Request,
@@ -65,21 +65,17 @@ const createReviewHandler = async (req: Request, res: Response) => {
 }
 
 const updateReviewHandler = async (req: Request, res: Response) => {
-  const reviewID: string = req.params.id
-  const reviewPayload: ReviewInsertDTO = {
+  const reviewPayload: ReviewUpdateDTO = {
     ...req.body,
   }
 
-  const updateReview: unknown = await reviewService.updateReview(
-    reviewPayload,
-    reviewID,
-  )
+  const updateReview: any = await reviewService.updateReview(reviewPayload)
 
   if (!updateReview) {
     throw new BadRequestError('Can not update ')
   }
 
-  logger.info(`Update review with id: ${req.params.id} successfull`)
+  logger.info(`Update review with reviewID: ${req.body.reviewID} successfull`)
   res.status(StatusCodes.OK).json({
     message: 'Update Review success',
   })
@@ -87,14 +83,15 @@ const updateReviewHandler = async (req: Request, res: Response) => {
 
 const deleteReviewHandler = async (req: Request, res: Response) => {
   const deleteReview: unknown = await reviewService.deleteReview(req.params.id)
+
   if (!deleteReview) {
     logger.error('Delete review failure: review not found')
     throw new ConflictError('Provider not found')
   }
 
-  logger.info(`Delete provider with id: ${req.params.id} successfull`)
+  logger.info(`Delete review with id: ${req.params.id} successfull`)
   res.status(StatusCodes.OK).json({
-    message: 'Delete provider successfull',
+    message: 'Delete review successfull',
   })
 }
 

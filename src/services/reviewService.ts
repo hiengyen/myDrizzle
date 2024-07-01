@@ -1,6 +1,6 @@
 import { db } from '../dbs/db'
 import { and, eq } from 'drizzle-orm'
-import { ReviewDTO, ReviewInsertDTO } from '../dto/reviewDTO'
+import { ReviewDTO, ReviewInsertDTO, ReviewUpdateDTO } from '../dto/reviewDTO'
 import { ReviewTable } from '../dbs/schema'
 
 const getReviewByID = async (
@@ -15,7 +15,6 @@ const getReviewByID = async (
 
 const getReview = async (): Promise<ReviewDTO[] | undefined> => {
   const reviews: ReviewDTO[] = await db.select().from(ReviewTable)
-
   return reviews
 }
 
@@ -23,39 +22,32 @@ const createReview = async (
   reviewPayload: ReviewInsertDTO,
 ): Promise<ReviewInsertDTO> => {
   const newReview: any = await db.insert(ReviewTable).values({
-    reviewContent: reviewPayload.reviewContent,
-    rating: reviewPayload.rating,
-    userID: reviewPayload.userID,
-    productID: reviewPayload.productID,
+    ...reviewPayload,
   })
   return newReview
 }
 
-const deleteReview = async (reviewID: string): Promise<string | undefined> => {
-  const deletedProviderID: { id: string }[] = await db
-    .delete(ReviewTable)
-    .where(eq(ReviewTable.reviewID, reviewID))
-    .returning({ id: ReviewTable.reviewID })
-
-  if (!deletedProviderID || deletedProviderID.length === 0) {
-    return undefined
-  }
-  return deletedProviderID[0].id
-}
 const updateReview = async (
-  reviewPayload: ReviewInsertDTO,
-  reviewID: string,
-) => {
-  await db
+  reviewPayload: ReviewUpdateDTO,
+): Promise<ReviewUpdateDTO> => {
+  const updateReview: any = await db
     .update(ReviewTable)
     .set({
       reviewContent: reviewPayload.reviewContent,
       rating: reviewPayload.rating,
-      userID: reviewPayload.userID,
-      productID: reviewPayload.userID,
     })
+    .where(eq(ReviewTable.reviewID, reviewPayload.reviewID))
+    .returning()
+
+  return updateReview
+}
+const deleteReview = async (reviewID: string) => {
+  const deleteByID = await db
+    .delete(ReviewTable)
     .where(eq(ReviewTable.reviewID, reviewID))
     .returning()
+
+  return deleteByID
 }
 
 export const reviewService = {
