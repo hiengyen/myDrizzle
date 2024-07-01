@@ -49,6 +49,8 @@ const getManyReviewHandler = async (
 const createReviewHandler = async (req: Request, res: Response) => {
   const reviewPayload: ReviewInsertDTO = {
     ...req.body,
+    userID: req.header('User-id'),
+    productID: req.params.id,
   }
 
   const newReview: unknown = await reviewService.createReview(reviewPayload)
@@ -59,7 +61,6 @@ const createReviewHandler = async (req: Request, res: Response) => {
 
   res.status(StatusCodes.CREATED).json({
     message: 'Create Review success',
-    info: newReview,
   })
 }
 

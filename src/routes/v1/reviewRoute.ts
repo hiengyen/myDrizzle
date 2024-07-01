@@ -19,7 +19,7 @@ router.get(
 )
 
 router.post(
-  '/',
+  '/:id',
   authMiddleware.isAuthorized,
   authMiddleware.accessTokenFromExactUser,
   reviewController.createReviewHandler,

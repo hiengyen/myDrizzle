@@ -6,8 +6,10 @@ import { BadRequestError } from '../errors/BadRequestError'
 import logger from '../utils/logger'
 import { ProviderDTO } from '../dto/providerDTO'
 
-const createProduct = async (productPayload: ProductInsertDTO) => {
-  await db.insert(ProductTable).values({
+const createProduct = async (
+  productPayload: ProductInsertDTO,
+): Promise<ProductInsertDTO | undefined> => {
+  const newProduct: any = await db.insert(ProductTable).values({
     productName: productPayload.productName,
     description: productPayload.description,
     length: productPayload.length,
@@ -18,6 +20,7 @@ const createProduct = async (productPayload: ProductInsertDTO) => {
     categoryID: productPayload.categoryID,
     providerID: productPayload.providerID,
   })
+  return newProduct
 }
 
 const updateProduct = async (productPayload: ProductDTO) => {

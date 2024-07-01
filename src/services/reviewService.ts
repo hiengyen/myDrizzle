@@ -19,13 +19,16 @@ const getReview = async (): Promise<ReviewDTO[] | undefined> => {
   return reviews
 }
 
-const createReview = async (reviewPayload: ReviewInsertDTO) => {
-  await db.insert(ReviewTable).values({
+const createReview = async (
+  reviewPayload: ReviewInsertDTO,
+): Promise<ReviewInsertDTO> => {
+  const newReview: any = await db.insert(ReviewTable).values({
     reviewContent: reviewPayload.reviewContent,
     rating: reviewPayload.rating,
     userID: reviewPayload.userID,
     productID: reviewPayload.productID,
   })
+  return newReview
 }
 
 const deleteReview = async (reviewID: string): Promise<string | undefined> => {

@@ -9,17 +9,17 @@ import { and, eq, sql } from 'drizzle-orm'
 import { compareSync, hashSync } from 'bcrypt'
 import { StatusCodes, ReasonPhrases } from 'http-status-codes'
 import logger from '../utils/logger'
-import { ProductDTO } from '../dto/productDTO'
+import { ProductDTO, ProductInsertDTO } from '../dto/productDTO'
 import { productService } from '../services/productService'
 import { BadRequestError } from '../errors/BadRequestError'
 import { ConflictError } from '../errors/ConflictError'
 
 const createProductHandler = async (req: Request, res: Response) => {
-  const productPayload: ProductDTO = {
+  const productPayload = {
     ...req.body,
   }
 
-  const newProduct: unknown = await productService.createProduct(productPayload)
+  const newProduct: any = await productService.createProduct(productPayload)
 
   if (!newProduct) {
     throw new BadRequestError('Can not create')
@@ -27,7 +27,6 @@ const createProductHandler = async (req: Request, res: Response) => {
 
   res.status(StatusCodes.CREATED).json({
     message: 'Create Product success',
-    info: newProduct,
   })
 }
 
