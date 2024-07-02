@@ -7,6 +7,11 @@ const router = express.Router()
 //
 router.get('/', authMiddleware.isAuthorized, productController.getProducts)
 router.post(
+  '/cartitems',
+  authMiddleware.isAuthorized,
+  productController.getSpecificIDs
+)
+router.post(
   '/',
   [
     authMiddleware.isAuthorized,
@@ -16,6 +21,7 @@ router.post(
   productController.createProductHandler
 )
 router.get('/:id', authMiddleware.isAuthorized, productController.getProduct)
+router.get('/', authMiddleware.isAuthorized, productController.getProducts)
 router.patch(
   '/:id',
   [

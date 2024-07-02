@@ -1,10 +1,10 @@
+import { CategoryTable } from './../dbs/schema'
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env' })
 import { Request, Response, NextFunction } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import logger from '../utils/logger'
 import {
-  ProductDTO,
   ProductFullJoinDTO,
   ProductInsertDTO,
   ProductUpdateDTO,
@@ -39,11 +39,26 @@ const updateProductHandler = async (req: Request, res: Response) => {
     logger.error('Update product failure: product not found')
     throw new BadRequestError('Product not found')
   }
-  logger.info('into update')
   await productService.updateProduct(productPayload, productID)
 
   res.status(StatusCodes.OK).json({
     message: 'Update product succeed',
+  })
+}
+
+const getSpecificIDs = async (req: Request, res: Response) => {
+  const productIDs: string[] | undefined = req.body
+
+  if (!productIDs) {
+    logger.error('Get products failure: request missing some attrs in body')
+    throw new BadRequestError('Request missing some attrs in body')
+  }
+
+  const data = await productService.getProductsFullJoinWithID(productIDs)
+
+  res.status(StatusCodes.OK).json({
+    message: 'Update product succeed',
+    info: data,
   })
 }
 
@@ -65,13 +80,23 @@ const deleteProductHandler = async (req: Request, res: Response) => {
 }
 
 const getProducts = async (req: Request, res: Response) => {
-  const products: ProductDTO[] | undefined =
-    await productService.getProductsSummary()
-
+  const categoryID = req.query.categoryID as string
+  const providerID = req.query.providerID as string
+  const detail = req.query.detail as string
+  let payload = null
+  if (categoryID) {
+    payload = await productService.getProductWithCategoryID(categoryID)
+  } else if (providerID) {
+    payload = await productService.getProductWithProviderID(providerID)
+  } else if (detail) {
+    payload = await productService.getProductsFullJoin()
+  } else {
+    payload = await productService.getProductsSummary()
+  }
   logger.info(`Get products succeed`)
   res.status(StatusCodes.OK).json({
     message: 'Get products succeed',
-    info: products,
+    info: payload,
   })
 }
 
@@ -106,4 +131,5 @@ export default {
   getProducts,
   getProduct,
   getManyProduct,
+  getSpecificIDs,
 }

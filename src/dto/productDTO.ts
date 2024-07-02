@@ -84,7 +84,17 @@ interface ProductFullJoinDTO {
   categoryID: string | null
   providerID: string | null
   options: (string | null)[]
-  items: ProductItemDTO[]
+  items: {
+    itemID: string | null
+    thump: string | null
+    quantity: number | null
+    price: number | null
+    productCode: string | null
+    discount: number | null
+    colorName: string | null
+    storageName: string | null
+    images: string[]
+  }[]
 }
 
 export {

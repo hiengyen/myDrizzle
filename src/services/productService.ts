@@ -283,70 +283,6 @@ const getProductsSummary = async (): Promise<ProductDTO[]> => {
   return products
 }
 
-// const getProductFullJoinDTO = async (
-//   productID: string
-// ): Promise<ProductDTO[]> => {
-//   const rows = await db
-//     .select({
-//       productID: ProductTable.productID,
-//       productName: ProductTable.productName,
-//       description: ProductTable.description,
-//       length: ProductTable.length,
-//       width: ProductTable.width,
-//       height: ProductTable.height,
-//       weight: ProductTable.weight,
-//       warranty: ProductTable.warranty,
-//       categoryID: CategoryTable.categoryID,
-//       providerID: ProviderTable.providerID,
-//       optionID: ProductAttributeTable.optionID,
-//       item: {
-//         itemID: ProductItemTable.itemID,
-//         thump: ProductItemTable.thump,
-//         quantity: ProductItemTable.quantity,
-//         price: ProductItemTable.price,
-//         productCode: ProductItemTable.productCode,
-//         discount: ProductItemTable.discount,
-//         colorName: ProductItemTable.colorName,
-//         storageName: ProductItemTable.storageName,
-//         images: ItemImageTable.source,
-//       },
-//     })
-//     .from(ProductTable)
-//     .where(eq(ProductTable.productID, productID))
-//     .leftJoin(ProductAttributeTable, eq(ProductTable.productID, productID))
-//     .leftJoin(ProductItemTable, eq(ProductItemTable.productID, productID))
-//     .leftJoin(
-//       ItemImageTable,
-//       eq(ItemImageTable.itemID, ProductItemTable.itemID)
-//     )
-
-//   const initProduct: ProductFullJoinDTO = {
-//     productID: rows[0].productID,
-//     productName: rows[0].productName,
-//     description: rows[0].description,
-//     length: rows[0].length,
-//     width: rows[0].width,
-//     height: rows[0].height,
-//     weight: rows[0].weight,
-//     warranty: rows[0].warranty,
-//     categoryID: rows[0].categoryID,
-//     providerID: rows[0].providerID,
-//     options: [],
-//     items: [],
-//   }
-//   const product: ProductFullJoinDTO = rows.reduce<ProductFullJoinDTO>(
-//     (prev, curr) => {
-//       if (!prev.options?.find(optionID => optionID === curr.optionID)) {
-//         prev.options.push(curr.optionID)
-//       }
-//       if()
-
-//       return prev
-//     },
-//     initProduct
-//   )
-// }
-
 const getProductFullJoinDTO = async (
   productID: string
 ): Promise<ProductFullJoinDTO> => {
@@ -376,8 +312,6 @@ const getProductFullJoinDTO = async (
       .from(ProductAttributeTable)
       .where(eq(ProductAttributeTable.productID, productID)),
   ])
-  logger.info(`image left join item row counter: ${rawData[1].length}`)
-  console.log('get product data success')
   //Make product
   const product: ProductFullJoinDTO = {
     ...rawData[0][0],
@@ -401,19 +335,452 @@ const getProductFullJoinDTO = async (
           storageName: curr.storageName,
           images: [],
         }
-        curr.source && newItem.images.push(curr.source)
+        curr.source && newItem.images?.push(curr.source)
         prev.push(newItem)
       } else {
-        curr.source && itemHolder.images.push(curr.source)
+        curr.source && itemHolder.images?.push(curr.source)
       }
       return prev
     }, []),
   }
 
-  logger.info(
-    `after assemble images counter: ${product.items[0].images.length}`
-  )
   return product
+}
+
+const getProductWithCategoryID = async (
+  categoryID: string
+): Promise<ProductFullJoinDTO[]> => {
+  const rows = await db
+    .select({
+      productID: ProductTable.productID,
+      productName: ProductTable.productName,
+      description: ProductTable.description,
+      length: ProductTable.length,
+      width: ProductTable.width,
+      height: ProductTable.height,
+      weight: ProductTable.weight,
+      warranty: ProductTable.warranty,
+      categoryID: ProductTable.categoryID,
+      providerID: ProductTable.providerID,
+      optionID: ProductAttributeTable.optionID,
+      item: {
+        itemID: ProductItemTable.itemID,
+        thump: ProductItemTable.thump,
+        quantity: ProductItemTable.quantity,
+        price: ProductItemTable.price,
+        productCode: ProductItemTable.productCode,
+        discount: ProductItemTable.discount,
+        colorName: ProductItemTable.colorName,
+        storageName: ProductItemTable.storageName,
+        source: ItemImageTable.source,
+      },
+    })
+    .from(ProductTable)
+    .where(eq(ProductTable.categoryID, categoryID))
+    .leftJoin(
+      ProductAttributeTable,
+      eq(ProductTable.productID, ProductTable.productID)
+    )
+    .leftJoin(
+      ProductItemTable,
+      eq(ProductItemTable.productID, ProductTable.productID)
+    )
+    .leftJoin(
+      ItemImageTable,
+      eq(ItemImageTable.itemID, ProductItemTable.itemID)
+    )
+
+  const products: ProductFullJoinDTO[] = rows.reduce<ProductFullJoinDTO[]>(
+    (prev, curr) => {
+      const productHolder: ProductFullJoinDTO | undefined = prev.find(
+        product => product.productID === curr.productID
+      )
+      if (
+        !productHolder &&
+        (curr.item.colorName ||
+          curr.item.source ||
+          curr.item.discount ||
+          curr.item.price ||
+          curr.item.productCode ||
+          curr.item.quantity ||
+          curr.item.storageName ||
+          curr.item.thump)
+      ) {
+        const newProduct: ProductFullJoinDTO = {
+          productID: curr.productID,
+          productName: curr.productName,
+          description: curr.description,
+          length: curr.length,
+          width: curr.width,
+          height: curr.height,
+          weight: curr.weight,
+          warranty: curr.warranty,
+          categoryID: curr.categoryID,
+          providerID: curr.providerID,
+          options: [curr.optionID],
+          items: [
+            {
+              ...curr.item,
+              images: curr.item.source ? [curr.item.source] : [],
+            },
+          ],
+        }
+        prev.push(newProduct)
+      } else {
+        if (productHolder) {
+          const optionHolder: string | undefined | null =
+            productHolder.options.find(option => option === curr.optionID)
+          if (!optionHolder) {
+            productHolder.options.push(curr.optionID)
+          }
+
+          const itemHolder = productHolder.items.find(
+            item => item.itemID === curr.item.itemID
+          )
+          if (!itemHolder) {
+            const newItem = {
+              ...curr.item,
+              images: curr.item.source ? [curr.item.source] : [],
+            }
+            productHolder.items.push(newItem)
+          } else {
+            curr.item.source && itemHolder.images.push(curr.item.source)
+          }
+        }
+      }
+
+      return prev
+    },
+    []
+  )
+
+  return products
+}
+
+const getProductWithProviderID = async (
+  providerID: string
+): Promise<ProductFullJoinDTO[]> => {
+  const rows = await db
+    .select({
+      productID: ProductTable.productID,
+      productName: ProductTable.productName,
+      description: ProductTable.description,
+      length: ProductTable.length,
+      width: ProductTable.width,
+      height: ProductTable.height,
+      weight: ProductTable.weight,
+      warranty: ProductTable.warranty,
+      categoryID: ProductTable.categoryID,
+      providerID: ProductTable.providerID,
+      optionID: ProductAttributeTable.optionID,
+      item: {
+        itemID: ProductItemTable.itemID,
+        thump: ProductItemTable.thump,
+        quantity: ProductItemTable.quantity,
+        price: ProductItemTable.price,
+        productCode: ProductItemTable.productCode,
+        discount: ProductItemTable.discount,
+        colorName: ProductItemTable.colorName,
+        storageName: ProductItemTable.storageName,
+        source: ItemImageTable.source,
+      },
+    })
+    .from(ProductTable)
+    .where(eq(ProductTable.providerID, providerID))
+    .leftJoin(
+      ProductAttributeTable,
+      eq(ProductTable.productID, ProductTable.productID)
+    )
+    .leftJoin(
+      ProductItemTable,
+      eq(ProductItemTable.productID, ProductTable.productID)
+    )
+    .leftJoin(
+      ItemImageTable,
+      eq(ItemImageTable.itemID, ProductItemTable.itemID)
+    )
+  const products: ProductFullJoinDTO[] = rows.reduce<ProductFullJoinDTO[]>(
+    (prev, curr) => {
+      const productHolder: ProductFullJoinDTO | undefined = prev.find(
+        product => product.productID === curr.productID
+      )
+      if (
+        !productHolder &&
+        (curr.item.colorName ||
+          curr.item.source ||
+          curr.item.discount ||
+          curr.item.price ||
+          curr.item.productCode ||
+          curr.item.quantity ||
+          curr.item.storageName ||
+          curr.item.thump)
+      ) {
+        const newProduct: ProductFullJoinDTO = {
+          productID: curr.productID,
+          productName: curr.productName,
+          description: curr.description,
+          length: curr.length,
+          width: curr.width,
+          height: curr.height,
+          weight: curr.weight,
+          warranty: curr.warranty,
+          categoryID: curr.categoryID,
+          providerID: curr.providerID,
+          options: [curr.optionID],
+          items: [
+            {
+              ...curr.item,
+              images: curr.item.source ? [curr.item.source] : [],
+            },
+          ],
+        }
+        prev.push(newProduct)
+      } else {
+        if (productHolder) {
+          const optionHolder: string | undefined | null =
+            productHolder.options.find(option => option === curr.optionID)
+          if (!optionHolder) {
+            productHolder.options.push(curr.optionID)
+          }
+
+          const itemHolder = productHolder.items.find(
+            item => item.itemID === curr.item.itemID
+          )
+          if (!itemHolder) {
+            const newItem = {
+              ...curr.item,
+              images: curr.item.source ? [curr.item.source] : [],
+            }
+            productHolder.items.push(newItem)
+          } else {
+            curr.item.source && itemHolder.images.push(curr.item.source)
+          }
+        }
+      }
+
+      return prev
+    },
+    []
+  )
+
+  return products
+}
+
+const getProductsFullJoin = async (): Promise<ProductFullJoinDTO[]> => {
+  const rows = await db
+    .select({
+      productID: ProductTable.productID,
+      productName: ProductTable.productName,
+      description: ProductTable.description,
+      length: ProductTable.length,
+      width: ProductTable.width,
+      height: ProductTable.height,
+      weight: ProductTable.weight,
+      warranty: ProductTable.warranty,
+      categoryID: ProductTable.categoryID,
+      providerID: ProductTable.providerID,
+      optionID: ProductAttributeTable.optionID,
+      item: {
+        itemID: ProductItemTable.itemID,
+        thump: ProductItemTable.thump,
+        quantity: ProductItemTable.quantity,
+        price: ProductItemTable.price,
+        productCode: ProductItemTable.productCode,
+        discount: ProductItemTable.discount,
+        colorName: ProductItemTable.colorName,
+        storageName: ProductItemTable.storageName,
+        source: ItemImageTable.source,
+      },
+    })
+    .from(ProductTable)
+    .leftJoin(
+      ProductAttributeTable,
+      eq(ProductTable.productID, ProductTable.productID)
+    )
+    .leftJoin(
+      ProductItemTable,
+      eq(ProductItemTable.productID, ProductTable.productID)
+    )
+    .leftJoin(
+      ItemImageTable,
+      eq(ItemImageTable.itemID, ProductItemTable.itemID)
+    )
+
+  const products: ProductFullJoinDTO[] = rows.reduce<ProductFullJoinDTO[]>(
+    (prev, curr) => {
+      const productHolder: ProductFullJoinDTO | undefined = prev.find(
+        product => product.productID === curr.productID
+      )
+      if (
+        !productHolder &&
+        (curr.item.colorName ||
+          curr.item.source ||
+          curr.item.discount ||
+          curr.item.price ||
+          curr.item.productCode ||
+          curr.item.quantity ||
+          curr.item.storageName ||
+          curr.item.thump)
+      ) {
+        const newProduct: ProductFullJoinDTO = {
+          productID: curr.productID,
+          productName: curr.productName,
+          description: curr.description,
+          length: curr.length,
+          width: curr.width,
+          height: curr.height,
+          weight: curr.weight,
+          warranty: curr.warranty,
+          categoryID: curr.categoryID,
+          providerID: curr.providerID,
+          options: [curr.optionID],
+          items: [
+            {
+              ...curr.item,
+              images: curr.item.source ? [curr.item.source] : [],
+            },
+          ],
+        }
+        prev.push(newProduct)
+      } else {
+        if (productHolder) {
+          const optionHolder: string | undefined | null =
+            productHolder.options.find(option => option === curr.optionID)
+          if (!optionHolder) {
+            productHolder.options.push(curr.optionID)
+          }
+
+          const itemHolder = productHolder.items.find(
+            item => item.itemID === curr.item.itemID
+          )
+          if (!itemHolder) {
+            const newItem = {
+              ...curr.item,
+              images: curr.item.source ? [curr.item.source] : [],
+            }
+            productHolder.items.push(newItem)
+          } else {
+            curr.item.source && itemHolder.images.push(curr.item.source)
+          }
+        }
+      }
+
+      return prev
+    },
+    []
+  )
+
+  return products
+}
+
+const getProductsFullJoinWithID = async (
+  searchingIDs: string[]
+): Promise<ProductFullJoinDTO[]> => {
+  const rows = await db
+    .select({
+      productID: ProductTable.productID,
+      productName: ProductTable.productName,
+      description: ProductTable.description,
+      length: ProductTable.length,
+      width: ProductTable.width,
+      height: ProductTable.height,
+      weight: ProductTable.weight,
+      warranty: ProductTable.warranty,
+      categoryID: ProductTable.categoryID,
+      providerID: ProductTable.providerID,
+      optionID: ProductAttributeTable.optionID,
+      item: {
+        itemID: ProductItemTable.itemID,
+        thump: ProductItemTable.thump,
+        quantity: ProductItemTable.quantity,
+        price: ProductItemTable.price,
+        productCode: ProductItemTable.productCode,
+        discount: ProductItemTable.discount,
+        colorName: ProductItemTable.colorName,
+        storageName: ProductItemTable.storageName,
+        source: ItemImageTable.source,
+      },
+    })
+    .from(ProductTable)
+    .where(inArray(ProductTable.productID, searchingIDs))
+    .leftJoin(
+      ProductAttributeTable,
+      eq(ProductTable.productID, ProductTable.productID)
+    )
+    .leftJoin(
+      ProductItemTable,
+      eq(ProductItemTable.productID, ProductTable.productID)
+    )
+    .leftJoin(
+      ItemImageTable,
+      eq(ItemImageTable.itemID, ProductItemTable.itemID)
+    )
+
+  const products: ProductFullJoinDTO[] = rows.reduce<ProductFullJoinDTO[]>(
+    (prev, curr) => {
+      const productHolder: ProductFullJoinDTO | undefined = prev.find(
+        product => product.productID === curr.productID
+      )
+      if (
+        !productHolder &&
+        (curr.item.colorName ||
+          curr.item.source ||
+          curr.item.discount ||
+          curr.item.price ||
+          curr.item.productCode ||
+          curr.item.quantity ||
+          curr.item.storageName ||
+          curr.item.thump)
+      ) {
+        const newProduct: ProductFullJoinDTO = {
+          productID: curr.productID,
+          productName: curr.productName,
+          description: curr.description,
+          length: curr.length,
+          width: curr.width,
+          height: curr.height,
+          weight: curr.weight,
+          warranty: curr.warranty,
+          categoryID: curr.categoryID,
+          providerID: curr.providerID,
+          options: [curr.optionID],
+          items: [
+            {
+              ...curr.item,
+              images: curr.item.source ? [curr.item.source] : [],
+            },
+          ],
+        }
+        prev.push(newProduct)
+      } else {
+        if (productHolder) {
+          const optionHolder: string | undefined | null =
+            productHolder.options.find(option => option === curr.optionID)
+          if (!optionHolder) {
+            productHolder.options.push(curr.optionID)
+          }
+
+          const itemHolder = productHolder.items.find(
+            item => item.itemID === curr.item.itemID
+          )
+          if (!itemHolder) {
+            const newItem = {
+              ...curr.item,
+              images: curr.item.source ? [curr.item.source] : [],
+            }
+            productHolder.items.push(newItem)
+          } else {
+            curr.item.source && itemHolder.images.push(curr.item.source)
+          }
+        }
+      }
+
+      return prev
+    },
+    []
+  )
+
+  return products
 }
 
 export default {
@@ -425,4 +792,8 @@ export default {
   getProductItemCodeArray,
   getProductItemIDArray,
   getProductFullJoinDTO,
+  getProductWithCategoryID,
+  getProductWithProviderID,
+  getProductsFullJoin,
+  getProductsFullJoinWithID,
 }
